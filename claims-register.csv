@@ -1,0 +1,19 @@
+claim_id,性质或事实,证据类别,原论文或本研究的准确口径,攻击者与模型,论文位置,删减后证明义务,状态
+C01,匹配会话正确性,原论文已形式证明,未受损双方完成 matching sessions 时得到相同会话密钥；属于 SK-Security 第一条件,CK01/PQ 扩展,Definition 3 与 Definition 6 第 8–9 页；Theorem 1 第 16–17 页,同一投影后两侧派生与接受正确,基线已陈述；删减未证明
+C02,SK/Key-IND,原论文已形式证明,Π_HAKE 的 QPT SK advantage 由 2·min(KEM-AKE 归约项;Pr[QKD fail]) 界定,QPT；CK01；ROM combiner,Theorem 1 第 16–17 页；Definition 5–6 第 9 页,对每个删减变体重证 KDF/source admissibility 与 Key-IND,基线已陈述；删减未证明
+C03,PFS,原论文已形式证明,SK freshness 允许会话 expire 后腐化而仍可 Test；只限该模型的 PFS,CK01；QPT,Definition 4 与 PFS 段第 8–9 页；Theorem 1 第 16–17 页,保留原 expire/corrupt 顺序和可挑战集合,基线已陈述；删减未证明
+C04,QKD 黑盒组件 SK,原论文已形式证明,Π_QKD SK advantage 不超过 Pr[QKD fail] 且该组件结论面向无界攻击者,黑盒 QKD；认证经典通道；无界,Definition 7 第 10 页；Lemma 1 第 11 页,不改变 GetKey/GetKeyById 的 ID/失败/一次性语义,基线已陈述；删减未证明
+C05,KEM-AKE 组件 SK,原论文已形式证明,引用 Boyd 等定理给出 KEM IND-CCA 与 IND-CPA 及 MAC EUF-CMA 组成的界,QPT；CK01；诚实 setup,Lemma 3 第 16 页,核对删减不影响组件证明接口或认证依赖,基线引用并给证明概要；删减未证明
+C06,子协议独立性,原论文已形式证明,KEM 与 QKD 子协议在最终 combiner 前不依赖彼此的秘密/中间量,Figure 3 模型,Lemma 2 第 15 页,只删 context 不得改变子协议的消息及状态路径,基线已陈述；删减未证明
+C07,QKD 失败时的 KEM 分支,原论文已形式证明,若 KEM-AKE 计算假设成立则 Theorem 1 的 KEM 项支持 QPT 安全,QPT；CK01；ROM,Theorem 1 第 16–17 页及第 19 页总结,重证本分支并不得借用已失效 QKD source,基线有条件界；删减未证明
+C08,KEM 假设失效时的 QKD 分支,原论文已形式证明,Theorem 1 的 QKD 项支持 QPT hybrid SK；具体 KEM 故障语义尚须 M3 固定,QPT；黑盒 QKD；ROM,Theorem 1 第 16–17 页及第 19 页总结,检查新增 KEM binding 在该分支是否合法；不暗中加回,基线有条件界；删减未证明
+C09,条件 ITS,原论文已形式证明,原文 Theorem 2 在随机预言机模型下给无界攻击者 2·Pr[QKD fail] 界；不是具体 SHA-3 的无条件现实保证,无界；黑盒 QKD；ROM,Theorem 2 第 18–19 页,不能以计算性 binding 损失继承无界界；逐模型重证,基线已陈述；删减未证明
+C10,单向显式 key confirmation,原论文文字讨论,Bob 发 τ3 且 Alice 验证；反向只有后续 Alice 使用最终密钥时可能隐式确认,Figure 3 角色与完成时点,Figure 3 第 13 页；§3.1 第 15 页,保持实际方向并定义验证/接受事件；不得称双向显式确认定理,基线流程与讨论；独立游戏未见
+C11,UKS 抵抗,原论文文字讨论,身份被放进 context 使伙伴混淆导致不同派生键及确认失败的论述；非独立 UKS 定理,原文论述的 setup 与确认,§4 第 17–18 页,若删身份或其替代字段须建立正式 identity-agreement 游戏或反例,文字论述；删减未证明
+C12,KCI 抵抗,原论文文字讨论,原文基于双方 KEM-MAC 与未受损方密钥提出 KCI-style 抵抗论述；非独立 KCI 定理,原文腐化及组件假设,§4 第 18 页,若主张继承则给精确腐化游戏与归约,文字论述；删减未证明
+C13,identity/role agreement,本研究新增目标,完成并验证对应认证信息的诚实会话应与对端身份/角色/s/公钥映射一致；唯一性另定,待定义对应事件与 CK01 freshness,研究范围 §删减相关性质；论文 Definition 3 第 8 页及 Figure 3 第 13 页,证明事件对应并查循环依赖,未证明
+C14,contribution agreement,本研究新增目标,matching 且在相同派生阶段的会话应对应同一 KEM/QKD source 与 qkdKeyId 等贡献引用,待定义派生/完成事件,研究范围 §删减相关性质；论文 Figure 3 第 13 页,建立贡献映射及 QKD 接口约束,未证明
+C15,session separation,本研究新增目标,投影后保留 KDF 输入相同但逻辑会话语义不同的 Bad 事件应不可行或可归约,多会话与可查询未完成会话,研究范围 §删减相关性质；论文 §2.4 第 6–7 页,明确 Bad 与查询时点和归约损失,未证明
+C16,key independence,本研究新增目标,多会话 Reveal/Test 下的独立性须另设游戏；不由原单 Test Key-IND 自动推出,扩展多 Test 游戏待定义,研究范围 §删减相关性质；论文 Definition 5–6 第 9 页,若纳入贡献则新增游戏和证明；第一轮非主目标,未证明；扩展
+C17,transcript integrity,本研究新增目标,仅对 τ1/τ2/τ3 各自 MAC 覆盖字段建立发送验证对应；全 transcript 更强目标另定,事件与实际验证时点待定义,研究范围 §删减相关性质；论文 Figure 3 第 13 页,重查删减后认证对应及未覆盖字段,未证明
+C18,完整继承原 Hybrid 故障容忍,本研究新增目标,只有在原允许的每个分支和攻击者范围均不新增有效限制时才能称完整保持,QPT 分支及条件无界 ROM 分支,研究范围 §主目标；论文 Theorem 1–2 第 16–19 页,先过 Hybrid failure-branch gate；否则改称附加假设下条件保持,未证明
