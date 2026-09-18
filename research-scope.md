@@ -1,8 +1,10 @@
-# M0 研究范围与安全合同（2026-09-16）
+# M0 研究范围与安全合同（2026-09-18）
 
 ## 研究对象与证据边界
 
 基线是 Clermont–Henrich 的 `Π_HAKE`（本地 `2026-1231.pdf`，SHA-256 `E1F894E1F2C0973F230DE343B2133AE6C399621487EF6596C15FBF2507E58A62`），以论文 Figure 3、§2.4–2.6、§3.1、§4 为准。协议将 KEM-AKE 和黑盒 QKD 的 `(secret, context)` 输入二元 KDF `F`；原文写 `σ_KEM=k*`、`c_KEM=A∥pk_a∥B∥pk_b∥pk_e∥k_1∥k_2∥k*`，`σ_QKD=k_qkd`、`c_QKD=A∥B∥qkdKeyId`，512-bit 输出拆为确认用 `k_h^1` 和最终 256-bit 会话密钥 `k_h^2`（第 13–15 页）。这不是预先批准任何字段可删。`claims-register.csv` 逐项登记论文证据及新证明义务。
+
+第一篇只分析 `Π_HAKE` 的具体 context 投影与安全保持，不预设一般协议类别的 Context Elision Theorem。已有 primitive/protocol security guarantee 何时能一般地替代显式 KDF context binding，留作后续第二篇；本篇若出现可复用条件，只作为讨论线索，不替代 HAKE 变体证明。
 
 ## 第一轮允许的协议转换
 
@@ -26,18 +28,18 @@
 
 ## 删减相关性质的研究定位
 
-以下是**本研究拟定义的事件/游戏草案**，不是论文已有事件或已证结论。令 `Send_i(m, v)`、`Verify_i(m, v)`、`Derive_i(v, K)`、`Accept_i(v, K)` 分别记录角色 `i∈{A,B}` 的发送、成功验证、派生与接受；`v` 含 `(A,B,role,s,pk_a,pk_b,pk_e,ct_1,ct_2,ct*,qkdKeyId)` 的实际可得值，`K=k_h^2`。接受事件必须在 M1 按 Figure 3 的实际程序点定义：Bob 验证 `τ_2`、取得 QKD key 并派生后，Alice 验证 `τ_3` 后；不可凭空给 Bob 添加收到确认的事件。
+M0 只完成下表的**研究定位**。以下事件文字是供 M1/M3/M5 校准的草案，不是论文已有定义、已证结论或已经完成的严格事件/游戏。暂以 `Send_i(m, v)`、`Verify_i(m, v)`、`Derive_i(v, K)`、`Accept_i(v, K)` 表示角色 `i∈{A,B}` 的发送、成功验证、派生与接受；`v` 含 `(A,B,role,s,pk_a,pk_b,pk_e,ct_1,ct_2,ct*,qkdKeyId)` 的实际可得值，`K=k_h^2`。接受事件必须在 M1 按 Figure 3 的实际程序点定义：Bob 验证 `τ_2`、取得 QKD key 并派生后，Alice 验证 `τ_3` 后；不可凭空给 Bob 添加收到确认的事件。
 
 | 性质 | 第一轮可检查目标 | 定位 |
 |---|---|---|
-| identity/role agreement | `Accept_A` 应对应同 `A,B,s`、相反角色/公钥映射的 `Send_B(τ_3)`；`Accept_B` 应对应同参数的 `Send_A(τ_2)`，**不要求 Alice 已 Accept**。是否唯一对端另定 | 主定理的语义绑定条件；非原文独立定理 |
-| contribution agreement | 对 matching 且双方均 `Derive` 的实例，KEM/QKD source 引用、`qkdKeyId` 与 `K` 相同；对只一方完成者不虚构对端完成 | 辅助不变量，必要时作主定理条件 |
-| session separation | 定义 `Bad_alias`：两次可查询或已派生执行的 `(secret, retained context, label, L)` 相同而 `v` 的必要身份/角色/会话/贡献语义不同；要求其概率有明确归约界 | 主定理 Bad 事件；不要求不同会话密钥必不同 |
+| identity/role agreement | `Accept_A` 应对应同 `A,B,s`、相反角色/公钥映射的 `Send_B(τ_3)`；`Accept_B` 应对应同参数的 `Send_A(τ_2)`，**不要求 Alice 已 Accept**。是否唯一对端另定 | HAKE 删减分析的语义绑定辅助目标；非原文独立定理，是否需成为证明前提留待 M5 判断 |
+| contribution agreement | 对 matching 且双方均 `Derive` 的实例，KEM/QKD source 引用、`qkdKeyId` 与 `K` 相同；对只一方完成者不虚构对端完成 | HAKE 删减证明的辅助不变量；若需要附加前提，须在 M5 单独列明 |
+| session separation | 定义 `Bad_alias`：两次可查询或已派生执行的 `(secret, retained context, label, L)` 相同而 `v` 的必要身份/角色/会话/贡献语义不同；要求其概率有明确归约界 | HAKE 删减证明的候选 Bad 事件；不要求不同会话密钥必不同 |
 | key independence | 扩展游戏允许指定 fresh 目标与另一会话的合法 Reveal/Test 后区分目标 `K` 与随机；需另定双会话 freshness、查询一致性和优势 | 扩展性质；单 Test SK 不自动蕴含 |
-| transcript integrity | 每个 `Verify_A(τ_1)`、`Verify_B(τ_2)`、`Verify_A(τ_3)` 应对应发送方对**该 tag 实际 MAC 输入**的 `Send`；不要求 Figure 3 未覆盖字段也受保护 | 辅助认证对应；全 transcript 强化为扩展 |
+| transcript integrity | 每个 `Verify_A(τ_1)`、`Verify_B(τ_2)`、`Verify_A(τ_3)` 应对应发送方对**该 tag 实际 MAC 输入**的 `Send`；不要求 Figure 3 未覆盖字段也受保护 | HAKE 删减证明的辅助认证对应；全 transcript 强化为扩展 |
 
 论文第 18 页对 UKS/KCI 作文字论述，不把它们升级为独立已证游戏。PCS、协商/降级、QKD key 重复输出、恶意注册、状态回滚、组合式安全与部署攻击均不在第一轮；若构造范围外 separation，必须明确标为抽象反例，而非原 HAKE 漏洞。
 
 ## M0 交付判定
 
-本文件固定了对象、投影边界、攻击者、可挑战会话、赢的游戏与待保留分支；登记表区分原形式结果、文字讨论和新增目标。M0 的范围定义已完成，**安全保持和字段可删均未证明**。M1 须复核 Figure 3 的字段/接受时点与第 7、13、17 页对 SHA-3 输出长度/实例的表述；M3 再以原始形式定义补全非正式 freshness 和 Hybrid failure-branch compatibility，不能以本页替代证明。
+本文件固定了对象、投影边界、攻击者、可挑战会话、赢的游戏与待保留分支；登记表区分原形式结果、文字讨论和新增目标。M0 的研究定位已完成，但上表的严格事件/游戏尚未定义，**安全保持和字段可删均未证明**。M1 须复核 Figure 3 的字段/接受时点与第 7、13、17 页对 SHA-3 输出长度/实例的表述；M3 再以原始形式定义补全非正式 freshness 和 Hybrid failure-branch compatibility，不能以本页替代证明。
