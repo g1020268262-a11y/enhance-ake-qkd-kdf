@@ -41,4 +41,6 @@ k_h = k_h^1 ∥ k_h^2,  |k_h^1| = |k_h^2| = 256 bit
 
 ## 原论文声明与本文件的界限
 
+M2 补充：所引 Backendal 框架的抽象 `RO-KDF`（2026 全文 Fig.4 p15）将可恢复编码的 `(σ1,c1,σ2,c2,lbl)` 输入 H 一次并截取所需长度；NOF 固定 L 且 L 不得超过 H 输出。这个**抽象 H 调用数**不等于 HAKE 实现的 SHA3 置换数，也不解决 SHA3-256 与 512-bit 输出的不一致。Def.1 将 context 包含在公开辅助信息 α 中，与上文秘密值 context 的字面映射存在差异；只记录为 [M2 B1](novelty-gap.md)，不把这些秘密改成线上公开值。
+
 Lemma 2（第 15 页）称 KEM/QKD 子协议在最终 combiner 前独立；Figure 3 的第三条网络消息把两个子协议的材料批量发送，并不将 QKD **key** 作为 KEM 计算输入。不过 `τ_2` 的 MAC message 直接含 QKD `qkdKeyId`，所以不能将该引理概括成“两个组件完全没有跨层字段依赖”；其精确边界见 [baseline-spec.md](baseline-spec.md) 的 O13。Theorem 1（第 16–17 页）及 Theorem 2（第 18–19 页）给原协议在所述模型中的安全声明；这里没有重新证明它们，也没有修改 `F` 或上述任何输入。

@@ -149,3 +149,11 @@ Definition 7（第 10 页）规定 `GetKey` 无入参，在 Alice 侧选取可�
 | O13 | Lemma 2 第 15 页；Fig. 3 第 13 页 | Lemma 2 将两子协议称为独立，Figure 3 的 `τ_2` MAC message 却直接含 QKD 输出的 `qkdKeyId`。这至少是跨层数据依赖；是否仍满足该引理所用的精确定义，本 PDF 的证明概要没有展开。M1 不把“独立”改写成“互不读取任何字段”。 | M2 Backendal/Boyd 所需接口；M3 明确组件边界 |
 
 M0 的协议对象、单向确认方向、KDF 两输入对及 QKD 一次输出大体与 Figure 3 一致；需警惕的措辞是 O5 的“检查”、O3 中尚未形式定义的 `Accept` 草案，以及 `claims-register.csv` 的 C06 若被解读为“完全不存在跨组件数据依赖”（O13）。UKS/KCI 被列为文字讨论、而非独立定理，与本次核对一致。M1 不触碰字段删减结论。
+
+## 10. M2/M3 回填（不改写 Figure 3）
+
+- O5 的 M0 措辞已改为“原有 KEM 调用及显式失败检查”，未添加公钥或密文验证步骤。
+- O11 的原始参考已核查：Boyd §2.4 明确单 Test、目标状态泄漏限制；CK01 §3.3–4.1 明确返回擦除、每侧过期以及 Test 后继续攻击。O3/O4/O7 **仍未关闭**：HAKE 与所引原文的 role、SID 唯一性、Complete/Test 语义并非逐字相同，见 `security-model.md` §3。
+- O9 部分补充：Backendal 2026 全文 Fig.4 p15 的抽象 RO-KDF 是一次 H 调用后截断，要求可恢复编码；不能因此确定 HAKE 实现的字节序列化或 SHA3 置换次数。O1 仍开放。
+- O13 没有因找到组件定理而关闭；现在明确为 source 分布/auxiliary 与消息处理接口的衔接义务 B3。
+- 新发现 B1/B2：公开 context 的 source 定义与 HAKE 秘密 context 不直接相容；源伪随机到不可预测的归约有预测/碰撞余项。详见 `novelty-gap.md`，不据此宣称协议漏洞。

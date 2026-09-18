@@ -1,13 +1,13 @@
 claim_id,性质或事实,证据类别,原论文或本研究的准确口径,攻击者与模型,论文位置,删减后证明义务,状态
 C01,匹配会话正确性,原论文已形式证明,未受损双方完成 matching sessions 时得到相同会话密钥；属于 SK-Security 第一条件,CK01/PQ 扩展,Definition 3 与 Definition 6 第 8–9 页；Theorem 1 第 16–17 页,同一投影后两侧派生与接受正确,基线已陈述；删减未证明
-C02,SK/Key-IND,原论文已形式证明,Π_HAKE 的 QPT SK advantage 由 2·min(KEM-AKE 归约项;Pr[QKD fail]) 界定,QPT；CK01；ROM combiner,Theorem 1 第 16–17 页；Definition 5–6 第 9 页,对每个删减变体重证 KDF/source admissibility 与 Key-IND,基线已陈述；删减未证明
-C03,PFS,原论文已形式证明,SK freshness 允许会话 expire 后腐化而仍可 Test；只限该模型的 PFS,CK01；QPT,Definition 4 与 PFS 段第 8–9 页；Theorem 1 第 16–17 页,保留原 expire/corrupt 顺序和可挑战集合,基线已陈述；删减未证明
+C02,SK/Key-IND,原论文已形式证明,原文给 Π_HAKE 的 QPT 界 2·min(KEM-AKE 归约项;Pr[QKD fail])；此分类不等于本项目独立核验,QPT；CK01；ROM combiner,Theorem 1 第 16–17 页；Definition 5–6 第 9 页,对每个删减变体重证 KDF/source admissibility 与 Key-IND,M2发现B1–B7衔接义务；原界尚未独立核验；删减未证明
+C03,PFS,原论文已形式证明,H26文字称过期后腐化仍可Test；R-CK则Test时未过期并允许后续Expire再Corrupt；两口径不得混写,H26非正式freshness及R-CK参考语义分别记录,Definition 4 与 PFS 段第 8–9 页；CK01 §4.1；security-model.md §3,先明确Test及擦除时序再比较可挑战集合,M3已核查原始来源；H历史Test接口仍未冻结；删减未证明
 C04,QKD 黑盒组件 SK,原论文已形式证明,Π_QKD SK advantage 不超过 Pr[QKD fail] 且该组件结论面向无界攻击者,黑盒 QKD；认证经典通道；无界,Definition 7 第 10 页；Lemma 1 第 11 页,不改变 GetKey/GetKeyById 的 ID/失败/一次性语义,基线已陈述；删减未证明
 C05,KEM-AKE 组件 SK,原论文已形式证明,引用 Boyd 等定理给出 KEM IND-CCA 与 IND-CPA 及 MAC EUF-CMA 组成的界,QPT；CK01；诚实 setup,Lemma 3 第 16 页,核对删减不影响组件证明接口或认证依赖,基线引用并给证明概要；删减未证明
-C06,子协议独立性,原论文已形式证明,KEM 与 QKD 子协议在最终 combiner 前不依赖彼此的秘密/中间量,Figure 3 模型,Lemma 2 第 15 页,只删 context 不得改变子协议的消息及状态路径,基线已陈述；删减未证明
+C06,子协议独立性,原论文已形式证明,Lemma2声称组件独立；但Fig.3的τ2含qkdKeyId；消息依赖与source可独立采样必须另作衔接,Figure 3及KDF source模型,Lemma 2 第 15 页；novelty-gap.md B3,不改变消息路径并证明source与auxiliary及中止选择的映射,原引理已陈述；M2接口核验未闭合；删减未证明
 C07,QKD 失败时的 KEM 分支,原论文已形式证明,若 KEM-AKE 计算假设成立则 Theorem 1 的 KEM 项支持 QPT 安全,QPT；CK01；ROM,Theorem 1 第 16–17 页及第 19 页总结,重证本分支并不得借用已失效 QKD source,基线有条件界；删减未证明
-C08,KEM 假设失效时的 QKD 分支,原论文已形式证明,Theorem 1 的 QKD 项支持 QPT hybrid SK；具体 KEM 故障语义尚须 M3 固定,QPT；黑盒 QKD；ROM,Theorem 1 第 16–17 页及第 19 页总结,检查新增 KEM binding 在该分支是否合法；不暗中加回,基线有条件界；删减未证明
-C09,条件 ITS,原论文已形式证明,原文 Theorem 2 在随机预言机模型下给无界攻击者 2·Pr[QKD fail] 界；不是具体 SHA-3 的无条件现实保证,无界；黑盒 QKD；ROM,Theorem 2 第 18–19 页,不能以计算性 binding 损失继承无界界；逐模型重证,基线已陈述；删减未证明
+C08,KEM 假设失效时的 QKD 分支,原论文已形式证明,原文声称QPT hybrid SK；M3拆为QS与QB且不在QB恢复binding假设,QPT；黑盒 QKD；ROM,Theorem 1 第 16–17 页及第 19 页总结；security-contract.csv,检查新增 KEM binding 在该分支是否合法；不暗中加回,原分支声称已登记；B1–B7未闭合；删减未证明
+C09,条件 ITS,原论文已形式证明,原文Theorem2声称无界ROM中2·Pr[QKD fail]；所引Thm.9和Lemma23保留预测与碰撞项不能直接推出纯界,无界；黑盒 QKD；ROM查询预算未充分交代,Theorem 2 第 18–19 页；K25 Lemma23 p37与K26 p38；novelty-gap.md B2,审查源熵及oracle预算并重证；不得以计算binding或另一构造代替,M2独立核验不支持直接套用；不是已证协议漏洞；删减未证明
 C10,单向显式 key confirmation,原论文文字讨论,Bob 发 τ3 且 Alice 验证；反向只有后续 Alice 使用最终密钥时可能隐式确认,Figure 3 角色与完成时点,Figure 3 第 13 页；§3.1 第 15 页,保持实际方向并定义验证/接受事件；不得称双向显式确认定理,基线流程与讨论；独立游戏未见
 C11,UKS 抵抗,原论文文字讨论,身份被放进 context 使伙伴混淆导致不同派生键及确认失败的论述；非独立 UKS 定理,原文论述的 setup 与确认,§4 第 17–18 页,若删身份或其替代字段须建立正式 identity-agreement 游戏或反例,文字论述；删减未证明
 C12,KCI 抵抗,原论文文字讨论,原文基于双方 KEM-MAC 与未受损方密钥提出 KCI-style 抵抗论述；非独立 KCI 定理,原文腐化及组件假设,§4 第 18 页,若主张继承则给精确腐化游戏与归约,文字论述；删减未证明

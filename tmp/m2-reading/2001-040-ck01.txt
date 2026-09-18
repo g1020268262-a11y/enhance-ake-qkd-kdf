@@ -1,0 +1,2215 @@
+   Analysis of Key-Ex hange Proto ols and Their Use for Building
+                                                                       
+                                           Se ure Channels
+
+
+                                  Ran Canetti
+                                                  y          Hugo Kraw zyk
+                                                                                 z
+
+                                                 May 17, 2001
+
+
+
+
+                                                      Abstra t
+
+          We present a formalism for the analysis of key-ex hange proto ols that ombines previous
+      de nitional approa hes and results in a de nition of se urity that enjoys some important analyt-
+      i al bene ts: (i) any key-ex hange proto ol that satis es the se urity de nition an be omposed
+      with symmetri en ryption and authenti ation fun tions to provide provably se ure ommuni a-
+      tion hannels; and (ii) the de nition allows for simple modular proofs of se urity: one an design
+      and prove se urity of key-ex hange proto ols in an idealized model where the ommuni ation
+      links are perfe tly authenti ated, and then translate them using general tools to obtain se urity
+      in the realisti setting of adversary- ontrolled links. We exemplify the usability of our results by
+      applying them to obtain the proof of two main lasses of key-ex hange proto ols, DiÆe-Hellman
+      and key-transport, authenti ated via symmetri or asymmetri te hniques.
+          Further ontributions of the paper in lude the formalization of \se ure hannels" in the
+        ontext of key-ex hange proto ols, and establishing suÆ ient onditions on the symmetri en-
+        ryption and authenti ation fun tions to realize these hannels.
+
+
+
+
+  
+    This do ument des ribes work in progress. Please he k for future updates of this work at http://eprint.ia r.org.
+An extended abstra t of this work appears in the pro eedings of Euro rypt 2001, LNCS Vol. 2045.
+  y
+    IBM T.J. Watson Resear h Center, Yorktown Heights, New York 10598. Email: anettiwatson.ibm. om.
+  z EE Department, Te hnion, Haifa, Israel. Email: hugoee.te hnion.a .il. Supported by Irwin and Bethea Green
+& Detroit Chapter Career Development Chair.
+Contents
+
+1 Introdu tion                                                                                        1
+  1.1 Related work . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    2
+
+2 Proto ol and Adversary Models: An Overview                                                          3
+  2.1 Proto ols, Sessions and Key-Ex hange . . . . . . . . . . . . . . . . . . . . . . . . . .        4
+  2.2 The unauthenti ated-links adversarial model (um) . . . . . . . . . . . . . . . . . . .          5
+  2.3 The am, proto ol emulation and authenti ators . . . . . . . . . . . . . . . . . . . . .         7
+
+3 The models                                                                                          8
+  3.1   Message-Driven Proto ols . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 8
+  3.2   The unauthenti ated-links adversarial model (um). . . . . . . . . . . . . . . . . . . . 8
+  3.3   Key Ex hange Proto ols . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 10
+  3.4   The am Model and Authenti ators . . . . . . . . . . . . . . . . . . . . . . . . . . . . 12
+
+4 Session-Key Se urity                                                                               13
+  4.1 De nition of SK-Se urity . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 13
+  4.2 Forward Se re y . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . 15
+
+5 SK-Se ure Proto ols                                                                                16
+  5.1   Two-move DiÆe-Hellman in the am . . . . . . . . . . . . . . . . . . . . . . . . . . .        18
+  5.2   SK-se ure DiÆe-Hellman Proto ol in the um . . . . . . . . . . . . . . . . . . . . . .        20
+  5.3   A publi -key en ryption-based proto ol without pfs . . . . . . . . . . . . . . . . . .       21
+  5.4   Proto ols based on shared keys . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   25
+
+6 Appli ations to Se ure Channels                                                                    26
+  6.1 A Template Proto ol: Network Channels . . . . . . . . . . . . . . . . . . . . . . . . .        26
+  6.2 Network Authenti ation . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     27
+  6.3 Network En ryption . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .     33
+      6.3.1 Dis ussion . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .   34
+  6.4 Se ure Channels . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .    35
+
+A More on Related Work                                                                               43
+1    Introdu tion
+
+Key-ex hange proto ols (ke, for short) are me hanisms by whi h two parties that ommuni ate over
+an adversarially- ontrolled network an generate a ommon se ret key. ke proto ols are essential
+for enabling the use of shared-key ryptography to prote t transmitted data over inse ure networks.
+As su h they are a entral pie e for building se ure ommuni ations (a.k.a \se ure hannels"), and
+are among the most ommonly used ryptographi proto ols ( ontemporary examples in lude SSL,
+IPSe , SSH, among others).
+    The design and analysis of se ure ke proto ols has proved to be a non-trivial task, with a
+large body of work written on the topi , in luding [18, 39, 12, 9, 19, 7, 8, 32, 2, 43℄ and many
+more. In fa t, even today, after two de ades of resear h, some important issues remain without
+satisfa tory treatment. One su h issue is how to guarantee the adequa y of ke proto ols for their
+most basi appli ation: the generation of shared keys for implementing se ure hannels. Providing
+this guarantee (with minimal requirements from ke proto ols) is the main fo us and obje tive of
+this work. The other entral goal of the paper is in simplifying the usability of the resultant se urity
+de nitions via a modular approa h to the design and analysis of ke proto ols. We exemplify this
+approa h with a proof of se urity for two important lasses of ke proto ols.
+    This paper adopts a methodology for the analysis of ke proto ols that results from the om-
+bination of two previous works in this area: Bellare and Rogaway [7℄ and Bellare, Canetti and
+Kraw zyk [2℄. A main ingredient in the formalization of [7℄ is the use of the indistinguishability
+approa h of [24℄ to de ning se urity: roughly speaking, a key-ex hange proto ol is alled se ure if
+under the allowed adversarial a tions it is infeasible for the atta ker to distinguish the value of a
+key generated by the proto ol from an independent random value. Here we follow this exa t same
+approa h but repla e the adversarial model of [7℄ with an adversarial model derived from [2℄. This
+ ombination allows to a hieve the above two main obje tives. We elaborate on these main aspe ts
+of our work.
+    First, the formalization of [2℄ aptures not only the spe i needs of ke proto ols but rather
+develops a more general model for the analysis of se urity proto ols. This allows formulating and
+proving the statement that ke proto ols proven se ure a ording to our de nition (we all these
+proto ols SK-se ure) an be used in standard ways to provide \se ure hannels". More spe i ally,
+ onsider the ommon se urity pra ti e by whi h pairs of parties establish a \se ure hannel" by rst
+ex hanging a session key using a ke proto ol and then using this key to en rypt and authenti ate
+the transmitted data under symmetri ryptographi fun tions. We prove that if in this setting
+one uses an SK-se ure ke proto ol together with se ure MAC and en ryption fun tions ombined
+appropriately then the resultant hannel provides both authenti ation and se re y (in a sense that
+we de ne pre isely) to the transmitted data. While this property of ensuring se ure hannels seems
+as an obvious requirement from a se ure ke proto ol it turns out that formalizing and proving this
+property is non-trivial. In fa t, there are \seemingly se ure" key ex hange proto ols that do not
+ne essarily guarantee this (e.g. those that use the session key during the ex hange itself), as well
+as proposed de nitions of se ure key-ex hange that do not suÆ e to guarantee this either (e.g., the
+de nitions in [7, 10, 11, 2℄). Moreover, although several works have addressed this issue (see Se tion
+1.1), to the best of our knowledge the notion of se ure hannels was never formalized in the ontext
+of ke proto ols, let alone demonstrating that some de nition of ke proto ols suÆ es for this basi
+task. Indeed, one of the ontributions of this work is a formalization of the se ure hannels task.
+While this formalization is not intended to provide general omposability properties for arbitrary
+ ryptographi settings, it arguably provides suÆ ient se urity guarantee for the entral task of
+prote ting the integrity and authenti ity of ommuni ations over adversarially- ontrolled links.
+
+                                                  1
+     Se ond, the approa h of [2℄ allows for a substantial simpli ation in designing ke proto ols and
+proving their se urity. This approa h postulates a two-step methodology by whi h proto ols an
+  rst be designed and analyzed in a mu h simpli ed adversarial setting where the ommuni ation
+links are assumed to be ideally authenti ated (i.e., the atta ker is not allowed to insert or hange
+information transmitted over the ommuni ation links between parties). Then, in a se ond step,
+these proto ols are \automati ally" transformed into se ure proto ols in the realisti s enario of
+fully adversary- ontrolled ommuni ations by applying a proto ol translation tool (or \ ompiler")
+  alled an authenti ator. Fortunately, simple and eÆ ient realizations of authenti ators based on
+di erent ryptographi fun tions exist [2℄ thus making it a useful and pra ti al design and analysis
+tool. (We stress that our framework does not mandate this methodology; i.e., it is possible of
+  ourse to prove se urity of a ke proto ol dire tly in the fully adversarial model.)
+     We use this approa h to prove the se urity of two important lasses of key-ex hange proto ols:
+DiÆe-Hellman and key-transport proto ols. All one needs to do is to simply prove the se urity
+of these proto ols in the ideal authenti ated-links model and then, thanks to the above modular
+approa h, one obtains versions of these proto ols that are se ure in a realisti adversary- ontrolled
+network. The \authenti ated" versions of the proto ols depend on the authenti ators in use. These
+  an be based either on symmetri or asymmetri ryptographi te hniques (depending on the trust
+model) and result in natural and pra ti al ke proto ols. The se urity guarantees that result from
+these proofs are substantial as they apture many of the se urity on erns in real ommuni ations
+settings in luding the asyn hronous nature of ontemporary networks, the run of multiple simul-
+taneous sessions, resistan e to man-in-the-middle and known-key atta ks, maintaining se urity of
+sessions even when other sessions are ompromised, and providing \perfe t forward se re y", i.e.,
+prote tion of past sessions in ase of the ompromise of long-term keying material.
+
+1.1 Related work
+Sin e its introdu tion in the seminal work of DiÆe and Hellman [18℄ the notion of a key-ex hange
+proto ol has been the subje t of many works (see [37℄ for an extensive bibliography). Here we
+mention some of the works that are more dire tly related to the present work. We further expand
+our dis ussion of these works in Appendix A.
+    Among the early works on this subje t we note [39, 12, 9, 19℄ as being instrumental in pointing
+out to the many subtleties involved in the analysis of ke proto ols. The rst omplexity-theoreti
+treatment of the notion of se urity for ke proto ols is due to Bellare and Rogaway [7℄ who formalize
+the se urity of ke proto ols in the realisti setting of on urrent sessions running in an adversary-
+ ontrolled network. As said above, [7℄ apply the indistinguishability de nitional approa h that
+we follow here as well. While [7℄ fo used on the shared-key model of authenti ation, other works
+[10, 11, 6℄ extended the te hniques to the publi -key setting. One important ontribution of [6℄ is
+in noting and xing a short oming in the original de nition of [7℄; this x, that we adopt here, is
+fundamental for proving our results about se ure hannels.
+    Bellare, Canetti, and Kraw zyk [2℄ present a model for studying general session-oriented se urity
+proto ols that we adopt and extend here. They also introdu e the \authenti ator" te hniques that
+allow for greatly simplifying the analysis of proto ols and that we use as a basi tool in our work. In
+addition, [2℄ proposes a de nition of se urity of ke proto ols rooted in the simulatability (or \ideal
+third party") approa h used to de ne se urity of multiparty omputation [23, 38, 1, 13℄. While this
+de nitional approa h is intuitively appealing the a tual ke se urity de nition of [2℄ omes short of
+the expe tations. On one hand, it seems over-restri tive, in the sense that it rules out proto ols
+that seem to provide suÆ ient se urity (and as demonstrated here an be safely used to obtain
+
+                                                  2
+se ure hannels); on the other, it is not lear whether their de nition suÆ es to prove omposition
+theorems even in the restri ted sense of se ure hannels as dealt with in this paper.
+    More re ently, Shoup [43℄ presents a framework for the de nition of se urity of ke proto ols that
+follows the basi simulatability approa h as in [2℄ but introdu es signi ant modi ations in order to
+over ome some of the short omings of the ke de nition in [2℄ as well as to seek omposability with
+other ryptographi appli ations. In parti ular, [43℄ states as a motivational goal the onstru tion
+of \se ure sessions" (similar to our se ure hannels), and it informally laims the suÆ ien y of its
+de nitions to a hieve this goal. A more rigorous and omplete elaboration of that work will be
+needed to assess the orre tness of these laims. In addition, [43℄ di ers from our work in several
+other interesting aspe ts (see Appendix A).
+    A promising general approa h for the analysis of rea tive proto ols and their on urrent om-
+position has been developed by P tzmann, S hunter and Waidner [41, 40, 42℄ and Canetti [14℄.
+This approa h, that follows the simulatability tradition, an be applied to the task of key ex hange
+to obtain a de nition of ke proto ols that guarantees se ure on urrent omposition with any set
+of proto ols that make use of the generated keys. See more details in [16℄.
+A subje tive dis ussion. The works mentioned above follow two main distin t approa hes to
+de ning se urity of ke proto ols: simulation-based and indistinguishability-based. The former is
+more intuitively appealing (due to its modeling of se urity via an ideally-trusted third party), and
+also appears to be more amenable to demonstrating general omposability properties of proto ols.
+On the other hand, the omplexity of the resulting de nitions, on e all details are lled in, is
+  onsiderable and makes for de nitions that are relatively omplex to work with. In ontrast,
+the indistinguishability-based approa h yields de nitions that are simpler to state and easier to
+work with, however their adequa y for modeling the task at hand seems less lear at rst glan e.
+The results in this paper indi ate the suitability of the indistinguishability-based approa h in the
+  ontext of ke proto ols | if the goal is the appli ation of ke proto ols to the spe i task of se ure
+ hannels as de ned here. By following this approa h we gain the bene t of simpler analysis and
+easier-to-write proofs of se urity. At the same time, our work borrows from the simulation-based
+approa h the modularity of building proofs via the intermediate ideally-authenti ated links model,
+thus enjoying the \best of both worlds".
+Organization. Se tion 2 presents an overview of the proto ol and adversary models used through-
+out this work. This overview is intended to introdu e the elements of this model in a \reader-
+friendly" way. The formal te hni al treatment appears in Se tion 3. The de nition of SK-se urity
+for ke proto ols is presented in Se tion 4. Se tion 5 proves the se urity of several proto ols and
+illustrates the modular methodology used in our analysis. Finally, in Se tion 6 we introdu e a
+formalization of \se ure hannels" and demonstrate the suitability of our notion of se urity for ke
+proto ols for realizing se ure hannels.
+
+2    Proto ol and Adversary Models: An Overview
+
+In order to to de ne what is meant by the se urity of a key-ex hange (ke) proto ol we rst need
+to establish a formalism for the most basi notions: what is meant by a proto ol in general and
+a key-ex hange proto ol in parti ular, what are sessions, and what is an `atta ker' against su h
+proto ols. Here we use a formalism based on the approa h of [2℄, where a general framework for
+studying the se urity of session-based multi-party proto ols over inse ure hannels is introdu ed.
+We extend and re ne this formalism to better t the needs of pra ti al ke proto ols.
+    In order to motivate and make the formalism easier to understand, we start by providing a
+
+                                                 3
+high-level overview of our model. The pre ise te hni al des ription appears in Se tion 3. (We
+note that the pre ise te hni al details are essential for a full development and proof of our results.
+However, we re ommend rst reading this overview in order to make the te hni al part more
+understandable.) After introdu ing the proto ol and adversary models we pro eed to de ne the
+se urity of ke proto ols in Se tion 4.
+
+2.1 Proto ols, Sessions and Key-Ex hange
+Message-driven proto ols We onsider a set of parties (probabilisti polynomial-time ma hines),
+whi h we usually denote by P1 ; : : : ; Pn , inter onne ted by point-to-point links over whi h messages
+ an be ex hanged.1 Proto ols are olle tions of intera tive pro edures, run on urrently by these
+parties, that spe ify a parti ular pro essing of in oming messages and the generation of outgoing
+messages. Proto ols are initially triggered at a party by an external \ all" and later by the arrival
+of messages. Upon ea h of these events, and a ording to the proto ol spe i ation, the proto ol
+pro esses information and may generate and transmit a message and/or wait for the next message
+to arrive. We all these message-driven proto ols. (We note the asyn hronous nature of proto ols
+de ned in this way whi h re e ts the prevalent form of ommuni ation in today's networks.)
+Sessions and proto ol output. Proto ols an trigger the initiation of sub-proto ols (i.e. inter-
+a tive subroutines) or other proto ols, and several opies of su h proto ols may be simultaneously
+run by ea h party. We all ea h opy of a proto ol run at a party a session. Te hni ally, a session is
+an intera tive subroutine exe uted inside a party. Ea h session is identi ed by the party that runs
+it, the parties with whom the session ommuni ates and by a session-identi er. These identi ers
+are used in pra ti e to bind transmitted messages to their orresponding sessions. Ea h invo ation
+of a proto ol (or session) at a given party reates a lo al state for that session during exe ution, and
+produ es lo al outputs by that party. This output an be a quantity (e.g a session key) returned to
+the alling program, or it an be the re ording of a proto ol event (su h as a su essful or failed
+termination). These lo al outputs serve to represent the \history" of a proto ol and are important
+to formalize se urity. When a session ends its run we all it omplete and assume that its lo al
+state is erased.
+Key-ex hange proto ols. Key-ex hange (ke) proto ols are message-driven proto ols (as de ned
+above) where the ommuni ation takes pla e between pairs of parties and whi h return, upon
+ ompletion, a se ret key alled a session key. More spe i ally, the input to a ke proto ol within
+ea h party Pi is of the form (Pi ; Pj ; s; role), where Pj is the identity of another party, s is a session
+id, and role an be either initiator or responder. A session within Pi and a session within Pj are
+ alled mat hing if their inputs are of the form (Pi ; Pj ; s; initiator) and (Pj ; Pi ; s; responder). The
+inputs are hosen by a \higher layer" proto ol that \ alls" the ke proto ol. We require the alling
+proto ol to make sure that the session id's of no two ke sessions in whi h the party parti ipates are
+identi al. Furthermore, we leave it to the alling proto ol to make sure that two parties that wish
+to ex hange a key will a tivate mat hing sessions. Note that this may require some ommuni ation
+before the a tual ke sessions are a tivated.2
+     Upon a tivation, the partners Pi and Pj of two mat hing sessions ex hange messages (the initiator
+goes rst), and eventually generate lo al outputs that in lude the name of the partners of the session,
+   1
+      This formalization postulates a xed number of parties in a network. An alternative, more general formalization
+allows the adversary to adaptively in rease the number of parti ipants. We prefer this simpler formalization sin e
+the di eren e seems in onsequential with respe t to realisti ke proto ols.
+    2
+      Indeed, in pra ti e proto ols for setting up a se ure session typi ally ex hange some messages before the a tual
+ ryptographi key-ex hange starts. The IKE proto ol of the IPSEC standard is a good example [28℄.
+
+
+                                                          4
+the session identi er, and the value of the omputed session key. A key establishment event is
+re orded only when the ex hange is ompleted (this signals, in parti ular, that the ex hanged key
+ an be used by the proto ol that alled the ke session). We note that a session an be ompleted
+at one partner but not ne essarily at the other.
+    After des ribing these `me hani s" of a ke proto ol we need to de ne what is meant by a
+\se ure" ke proto ol. This is the subje t of Se tion 4 and it is based on the adversarial model that
+we introdu e next.
+
+2.2 The unauthenti ated-links adversarial model (um)
+In order to talk about the se urity of a proto ol we need to de ne the adversarial setting that
+determines the apabilities and possible a tions of the atta ker. We want these apabilities to be
+as generi as possible (as opposed to, say, merely representing a list of possible atta ks) while not
+posing unrealisti requirements. We follow the general adversarial formalism of [2℄ but spe ialize
+and extend it here for the ase of ke proto ols. Using the terminology of [2℄ we all this model the
+Unauthenti ated Links Model (um).
+Basi atta ker apabilities. We onsider a probabilisti polynomial-time (ppt)3 atta ker that
+has full ontrol of the ommuni ations links: it an listen to all the transmitted information, de ide
+what messages will rea h their destination and when, hange these messages at will or inje t its own
+generated messages. The formalism represents this ability of the atta ker by letting the atta ker
+be the one in harge of passing messages from one party to another. The atta ker also ontrols the
+s heduling of all proto ol events in luding the initiation of proto ols and message delivery.
+Obtaining se ret information. In addition to these basi adversarial apabilities (given \for
+free" to the atta ker), we let the atta ker obtain se ret information stored in the parties memories
+via expli it atta ks. We onsider all the se ret information stored at a party as potentially vul-
+nerable to break-ins or other forms of leakage. However, when de ning se urity of a proto ol it is
+important to guarantee that the leakage of some form of se ret information has the least possible
+e e t on the se urity of other se rets. For example, we will want to guarantee that the leakage of
+information spe i to one session (su h as the leakage of a session key or ephemeral state infor-
+mation) will have no e e ts on the se urity of other sessions, or that even the leakage of ru ial
+long-term se rets (su h as private keys) that are used a ross multiple sessions will not ne essarily
+ ompromise se ret information from all past sessions. In order to be able to di erentiate between
+various vulnerabilities and to be able to guarantee as mu h se urity as possible in the event of in-
+formation exposures, we lassify atta ks into three ategories depending on the type of information
+a essed by the adversary:
+Party orruption. The atta ker an de ide at any point to orrupt a party, in whi h ase the atta ker
+learns all the internal memory of that party in luding long-term se rets (su h as private keys or
+master shared keys used a ross di erent sessions) and session-spe i information ontained in the
+party's memory (su h as internal state of in omplete sessions and session-keys orresponding to
+ ompleted sessions). Sin e by learning its long term se rets the atta ker an impersonate a party
+in all all its a tions then a party is onsidered ompletely ontrolled by the atta ker from the time
+of orruption and an, in parti ular, depart arbitrarily from the proto ol spe i ations.
+Session-key query. The atta ker provides a party's name and a session identi er of a ompleted
+session at that party and re eives the value of the key generated by the named session This atta k
+provides the formal modeling for leakage of information on spe i session keys that may result from
+  3
+      When proving spe i   proto ols one an repla e this generi ppt modeling with spe i   ryptographi assumptions.
+
+                                                        5
+events su h as break-ins, ryptanalysis, areless disposal of keys, et . It will also serve, indire tly,
+to ensure that the unavoidable leakage of information produ ed by the use of session keys in a
+se urity appli ation (e.g., information leaked on a key by its use as an en ryption key) will not help
+in deriving further information on this and other keys.
+Note: one ould de ne yet another adversary operation that would provide the atta ker with partial
+information on session keys (to spe i ally model information leaked via key usage), however it turns
+out that su h an addition, while adding omplexity to the model spe i ation, does not hange the
+power of the model sin e session-key queries as de ned here already suÆ e to apture leakage of
+any partial information on the session keys.
+Session-state reveal. The atta ker provides the name of a party and a session identi er of a yet
+in omplete session at that party and re eives the internal state of that session (sin e we see sessions
+as pro edures running inside a party then the internal state of a session is well de ned). An
+important point here is what information is in luded in the lo al state of a session; this is to
+be spe i ed by ea h ke proto ol. Therefore, our de nition of se urity is parameterized by the
+type and amount of information revealed in this atta k. For instan e, the information revealed in
+this way may be the exponent x used by a party to ompute a value gx in a DiÆe-Hellman key-
+ex hange proto ol, or the random bits used to en rypt a quantity under a probabilisti en ryption
+s heme during a session. (An example where su h state information may be vulnerable to atta k is
+appli ations { su h as those running in low-powered devi es { that pre- ompute, or upload, a le
+of pairs (x; gx ) for use during later \real-time" establishment of ke sessions. In this ase one would
+like to prevent that the exposure of su h a le, or part of it, will ompromise future sessions that
+do not use these values.)
+    We stress that while the rst two forms of atta k, party orruptions and session-key queries,
+are fundamental to the de nition of se urity of ke proto ols, the signi an e of the session-state
+reveal operation depends on the se urity model of an implementation. The di erentiation between
+party orruptions and session-state reveal operations assumes that orrupting a session state does
+not imply learning about long-term se rets; this impli itly assumes a separate se urity module
+where the operations involving these long-term se rets are performed. In settings where this is an
+unrealisti assumption, our model an be weakened by deleting the session-state reveal operation
+from the atta ker's apabilities. Certainly, proto ols proven se ure under our model will remain
+se ure in the weakened model.
+Terminology: if a session is subje t to any of the above three atta ks (i.e. a session-state reveal, a
+session-key query or the orruption of the party holding the session) then the session is alled lo ally
+exposed. If a session or its mat hing session is lo ally exposed then we all the session exposed.
+Session expiration. One important additional element in our se urity model is the notion of
+session expiration. This takes the form of a proto ol a tion that when a tivated auses the erasure
+of the named session key (and any related session state) from that party's memory. We allow a
+session to be expired at one party without ne essarily expiring the mat hing session. The e e t
+of this a tion in our se urity model is that the value of an expired session key annot be found
+via any of the above atta ks if these atta ks are performed after the session expired. This has two
+important onsequen es: it allows us to model the ommon (and good) se urity pra ti e of limiting
+the life-time of individual session keys and it allows for a simple modeling of the notion of perfe t
+forward se re y (see Se tion 4.2). We note that in order for a session to be lo ally exposed (as
+de ned above) the atta k against the session must happen before the session expires.
+Bootstrapping the se urity of key-ex hange proto ols. Key-ex hange proto ols, as other
+  ryptographi appli ations, require the bootstrapping of se urity (espe ially for authenti ation) via
+
+                                                  6
+some assumed-se ure means. Examples in lude the se ure generation of parties' private keys, the
+installation of publi keys of other parties, or the installation of shared \master" keys. Here too
+we follow the approa h of [2℄ where the bootstrapping of the authenti ation fun tions is abstra ted
+into an initialization fun tion that is run prior to the initiation of any key-ex hange proto ol and
+that produ es in a se ure way (i.e. without adversarial parti ipation) the required (long-term)
+information. By abstra ting out this initial phase we allow for the ombination of di erent proto ols
+with di erent initialization fun tions: in parti ular, it allows our analysis of proto ols (su h as
+DiÆe-Hellman) to be appli able under the two prevalent settings of authenti ation: symmetri
+and a-symmetri authenti ation. Two points to note are (1) the spe i ation of the initialization
+fun tion is part of the de nition of ea h ke proto ol; and (2) se ret information generated by
+this fun tion at a given party an be dis overed by the atta ker only upon orruption of that
+party. We stress that while this abstra tion adds to the simpli ity and appli ability of our analysis
+te hniques, the bootstrapping of se urity in a tual proto ols is an element that must be arefully
+analyzed (e.g., the intera tion with a CA in the ase of publi -key based proto ols). Integrating
+these expli it elements into the model an be done either dire tly as done in [43℄, or in a more
+modular way via appropriate proto ol omposition.
+
+2.3 The am, proto ol emulation and authenti ators
+A entral ingredient in our analyses is the methodology introdu ed in [2℄ by whi h one an design
+and analyze a proto ol under the highly-simplifying assumption that the atta ker annot hange
+information transmitted between parties, and then transform these proto ols and their se urity
+assuran e to the realisti um where the adversary has full ontrol of the ommuni ation links. We
+refer the reader to [2℄ for the details and also present a te hni al summary in Se tion 3.4.
+    First, an adversarial model alled authenti ated-links model (denoted am) is de ned in a way
+that is identi al to the um with one fundamental di eren e: the atta ker is restri ted to only
+deliver messages truly generated by the parties without any hange or addition to them. Then, the
+notion of \emulation" is introdu ed in order to apture the equivalen e of fun tionality between
+proto ols in di erent adversarial models, in parti ular between the um and am. Roughly speaking,
+a proto ol 0 emulates proto ol  in the um if for any adversary that intera ts with 0 in the um
+there exists an adversary that intera ts with  in the am su h that the two intera tions \look
+the same" to an outside observer. Finally, spe ial algorithms alled authenti ators are developed
+with the property that on input the des ription of a proto ol  the authenti ator outputs the
+des ription of a proto ol 0 su h that 0 emulates proto ol  in the um. That is, authenti ators a t
+as an automati \ ompiler" that translate proto ols in the am into equivalent (or \as se ure as")
+proto ols in the um.
+    In order to simplify the onstru tion of authenti ators, [2℄ o ers the following methodology.
+First onsider a very simple one- ow proto ol in the am, alled mt, whose sole fun tionality is
+to transmit a single message from sender to re ipient. Now build a restri ted-type authenti ator,
+ alled mt-authenti ator, required to provide emulation for this parti ular mt proto ol only. Finally,
+to any su h mt-authenti ator  one asso iates an algorithm (or ompiler) C that translates any
+input proto ol  into another proto ol 0 as follows: to ea h of the messages de ned in proto ol
+ apply the mt-authenti ator . It is proven in [2℄ that C is an authenti ator (i.e., the resultant
+proto ol 0 emulates  in the um). Parti ular realizations of mt-authenti ators are presented in [2℄
+based on di erent type of ryptographi fun tions (e.g., digital signatures, publi -key en ryption,
+MAC, et .)
+
+
+                                                 7
+3       The models
+
+This se tion presents a te hni al des ription of the proto ol and adversary models used throughout
+the paper. We strongly re ommend rst reading Se tion 2 whi h presents an overview of these
+models and their motivation.
+
+3.1 Message-Driven Proto ols
+An n-party message-driven proto ol is a olle tion of n programs, where ea h program is to be
+run by a di erent party. (Formally, ea h program is an intera tive ppt Turing ma hine, as de ned
+in [25℄.) Ea h program has the following interfa e. It is rst invoked with some initial input
+(that in ludes the party's identity), random input, and some value for the se urity parameter.
+On e invoked, the program waits for an a tivation. An a tivation an be aused by two types of
+events: either the arrival of an in oming message from the network, or an a tion request oming
+from other programs run by the party. (De ning valid a tion requests is part of the spe i ation
+of the proto ol.4 ) Upon a tivation, the program pro esses the in oming data, starting from its
+ urrent internal state, and as a result it an generate outgoing messages to the network and a tion
+requests to other programs run by the party. In addition, a lo al output value is generated. On e
+the a tivation is ompleted, the program waits for the next a tivation. We regard the lo al output
+as umulative. That is, initially the lo al output is empty; in ea h a tivation the urrent output
+is appended to the previous one. We will let a proto ol label some of its lo al output as `se ret'
+(e.g. the value of a se ret key generated by the proto ol). This will have e e t on the adversary's
+a tions that we de ne below.
+    An invo ation of a proto ol is alled a session. Note that a session of a proto ol  may involve
+several sessions of other proto ols that are alled by . (When treating the spe ial ase of key-
+ex hange proto ols in Se tion 3.3 the semanti s of sessions in that ontext will be given more
+spe i meaning.)
+
+3.2 The unauthenti ated-links adversarial model (um).
+The adversarial model um de nes the atta ker's apabilities and its intera tion with a proto ol.
+Figure 1 summarizes the way proto ols are exe uted in the presen e of a um adversary. Here we
+des ribe this in some more detail. Consider an n-party message-driven proto ol , with parties
+denoted by P1 :::Pn . Ea h party Pi has input xi and random input ri . In addition, we introdu e
+an adversarial entity, alled a um-adversary U . (The um-adversary is another program, or a ppt
+intera tive Turing ma hine, with an interfa e des ribed below.) The exe ution of proto ol  in the
+um onsists of a sequen e of a tivations of  within di erent parties. The a tivations are ontrolled
+and s heduled by U . That is, initially the proto ol is invoked within ea h party with a lo al input,
+random input and a value for the se urity parameter. Next, and upon the ompletion of ea h
+a tivation, U de ides whi h party to a tivate next, and on whi h in oming message or request. The
+outgoing messages and outgoing lo al a tion requests be ome known to U . Lo al outputs be ome
+known to U ex ept for those labeled `se ret'.
+    Note that U is free to hoose to a tivate any party with any a tivation allowed by the proto ol
+and in any order. Also, U an a tivate any party with any in oming message and any spe i ed
+    4
+     An a tion request an be, for instan e, a request to send a message or ex hange a key with some spe i ed party
+(we will see spe i examples in the sequel). We assume that every message spe i es the sender of the message and
+its intended re ipient.
+
+
+                                                        8
+                                         Proto ol exe ution in the um
+
+
+      Parti ipants: Parties P1 ; :::; Pn running an n-party proto ol  on inputs x1 ; :::; xn , respe tively, and
+      an adversary U .
+         1. Initialization: Ea h party Pi invokes  on lo al input xi , se urity parameter k and random
+            input. Next, Pi gets I (r; k )i and I (r; k )0 , where r is randomly hosen.
+         2. While U has not terminated do:
+              (a) U may a tivate  within some party, Pi . An a tivation an take two forms:
+                     i. An a tion request q . This a tivation models requests or invo ations oming from
+                        other programs run by the party.
+                    ii. An in oming message m with a spe i ed sender Pj . This a tivation models messages
+                         oming from the network.
+                  If an a tivation o urred then the a tivated party Pi runs its program and hands U the
+                  resulting outgoing messages and a tion requests. (We stress that U is free to hoose any
+                  s heduling of a tivations and determine the values of in oming messages.) Lo al outputs
+                  produ ed by the proto ol are known to U ex ept for those labeled `se ret'.
+              (b) U may orrupt a party Pi . Upon orruption, U learns the urrent internal state of Pi ,
+                  and a spe ial message is added to Pi 's lo al output. From this point on, Pi is no longer
+                  a tivated and does not generate further lo al output.
+              ( ) U may issue a session-state reveal for a spe i ed session within some party Pi . In this
+                   ase, U learns the urrent internal state of the spe i ed session within Pi . This event is
+                  re orded through a spe ial note in Pi 's lo al output.
+              (d) U may issue a session-output query for a spe i ed session within some party Pi . In this
+                   ase, U learns any output from the spe i ed session that was labeled `se ret'. This event
+                  is re orded through a spe ial note in Pi 's lo al output.
+         3. The global output of the exe ution is the on atenation of the outputs of U and P1 ; :::; Pn .
+
+                                    Figure 1: Proto ol exe ution in the um.
+
+
+sender. In parti ular, in oming messages need not orrespond in any way to messages that have
+been sent. (That is, U is free to generate, inje t, modify, and deliver any message of its hoi e.)
+    In addition to a tivating parties and ontrolling the network, U an perform the following
+a tivities. First, it an orrupt parties at will. Upon orruption of Pi , U learns the entire urrent
+state of Pi , in luding any long-term se ret, session states and se ret session outputs in the party's
+memory. From this point on, U an deliver any message of its hoi e in whi h Pi is spe i ed as
+the sender. The orrupted party Pi appends a spe ial note to its output, spe ifying that it has
+been orrupted. Pi is no longer a tivated and does not generate further lo al output. (A orrupted
+party is totally ontrolled by the adversary, and its a tions are taken by the atta ker itself.)
+Another type of a tivity is session-state reveal of a ertain session within party Pi . The e e t is
+that the internal state of the orresponding session within Pi (i.e., the lo al working spa e of the
+pro edure whose invo ation onstitutes the session) be omes known to U , and a spe ial message
+is added to the party's lo al output; no further output is generated for this session.5 A third
+  5
+      We do not spe ify how a session is identi ed; this will have to be part of the spe i ation of a proto ol. In the
+
+
+                                                           9
+adversarial a tivity is a session-output query. By issuing su h a query the adversary learns any
+output from that session that was labeled `se ret'. (This type of queries is parti ularly important
+in the ontext of key-ex hange proto ols below where this a tion is alled a `session-key query'.)
+The initialization fun tion I. Finally, we augment the proto ol  with an initialization fun tion
+I that models an initial phase of out-of-band and authenti ated information ex hange between
+the parties. (This fun tion models the ne essary trusted bootstrapping of ryptographi fun tions,
+e.g. by letting the parties hoose private and publi keys for some asymmetri rypto-system
+and trustfully distributing the publi keys.) Fun tion I takes a random input r and the se urity
+parameter k, and outputs a ve tor I (r; k) = I (r; k)0 ::::I (r; k)n . The omponent I (r; k)0 is the publi
+information and be omes known to all parties and to the adversary. For i > 0, I (r; k)i be omes
+known only to Pi . Note, however, that upon orruption of Pi the atta ker learns I (r; k)i .
+Global output. The global output of running a proto ol in the um is the on atenation of the
+ umulative lo al outputs of all the parties, together with the output of the adversary. The output of
+the adversary is a fun tion of its internal states at the end of the intera tion. We use the following
+notation. Let um-adv;U (k; ~x; ~r) denote the output of adversary U when intera ting with parties
+running proto ol  on se urity parameter k, input ~x = x1 : : : xn and random input ~r = r0 : : : rn
+as des ribed above (r0 for U ; xi and ri for party Pi ). (The initialization fun tion I is part of the
+des ription of proto ol .) Let unauth;U (k; ~x; ~r)i denote the umulative output of party Pi after
+running proto ol  on se urity parameter k, input ~x and random input ~r, and with an am-adversary
+U . Let unauth;U (k; ~x; ~r) = um-adv;U (k; ~x; ~r); unauth;U (k; ~x; ~r)1 : : : unauth;U (k; ~x; ~r)n . Let
+unauth;U (k; ~x) denote the random variable des ribing unauth;U (k; ~x; ~r) when ~r is uniformly
+ hosen. Let unauth;U denote the ensemble funauth;U (k; ~x)gk2N;~x2f0;1g .
+We have summarized the stru ture of a proto ol exe ution in the um in Figure 1.
+
+3.3 Key Ex hange Proto ols
+Key-ex hange proto ols are a spe ial ase of n-party message-driven proto ols. As su h they inherit
+the syntax of general message-driven proto ols as introdu ed before. In addition, in order to
+ apture the spe i semanti s of key ex hange, and the spe i               apabilities of atta kers against
+su h proto ols, we spe ify some additional syntax for these proto ols. (The intention of this syntax
+is to represent, in an abstra t but dire t way, the me hani s of key ex hange proto ols in a tual
+systems.)
+    Re all that a message-driven proto ol is a olle tion of n programs, where ea h program is
+run by a di erent party. (We envision that the program is invoked on e within ea h party at the
+onset of the omputation and remains a tive throughout.) On e invoked, it is a tivated either by a
+message oming from the network, or by an a tion request from other proto ols or programs run by
+the party. In the ase of a key-ex hange (ke) proto ol , the program within ea h party, Pi , takes
+a tion requests of the form establish-session(Pi ; Pj ; s; role) where Pj is another party (with whi h a
+key is to be ex hanged), s is a string alled the session-id, and role 2 finitiator; responderg. (This
+a tion request will typi ally be triggered by other proto ols run by the party that \ all" the ke
+proto ol, see for example Se tion 6.)
+Lo al outputs of a ke proto ol are of the form (Pi ; Pj ; s; ), where Pj ; s are as above and  is a
+session key. A null value of  is interpreted as a \session abortion" and will usually represent the
+termination of the session with a returned error message. Non-null session-key values are labeled
+ ontext of ke proto ols we will identify sessions via a session-id and the partners of the session; see more details in
+the next se tion.
+
+
+                                                          10
+`se ret'. (Re all that the lo al outputs are thought of as values returned by the session to the
+\ alling proto ol" that issued the initial establish-session a tivation.)
+     We further spe ify the internal stru ture of ea h of the n programs of a ke proto ol, as follows.
+Ea h su h program, running within Pi , onsists of a main pro edure ( an be thought of as a \shell")
+and a spe ial subroutine, alled a ke-subroutine. An invo ation of the ke-subroutine is alled a
+ke-session and is aimed at ex hanging a single key with a spe i ed party. The main pro edure
+pro eeds as follows. Upon a tivation with a tion request establish-session(Pi ; Pj ; s; role), it rst
+veri es that no ke-session was previously invoked (within Pi ) with inputs (Pi ; Pj ; s; role0 ) for some
+role0 2 finitiator; responderg (namely, the main pro edure makes sure that the identity of the session
+is unique among the sessions that Pi was requested to establish with Pj ). If the veri ation fails,
+then an appropriate error message is generated. Otherwise, a ke-session is invoked with inputs
+(Pi ; Pj ; s; role). From this point on, whenever the ke proto ol within Pi re eives a message that
+spe i es sender Pj and session-id s, it forwards this message to the relevant ke-session within Pi .
+On e a ke-session returns (typi ally, after a number of messages have been ex hanged between
+Pi and Pj ) with output (Pi ; Pj ; s; ), the ke proto ol re ords a session establishment event with
+parameters (Pi ; Pj ; s; ) in its lo al output. From these parameters only the value  of the session
+key is labeled `se ret'. A ke-session that returns with a non-null value of  is alled ompleted. If
+ = null then the ke-session is aborted and a spe ial note is re orded in the lo al output. It is
+assumed by onvention that, on e a ke-session returns, its entire lo al state, ex ept for the output
+value, is se urely erased. Note that this means that a session-state reveal after the session has
+returned will produ e an empty output for the atta ker.
+Mat hing sessions. We also use the following terminology: if in an exe ution of a ke proto ol
+Pi has a session with input (Pi ; Pj ; s; role) and party Pj has a session with input (Pj ; Pi ; s0 ; role0 ),
+and s = s0 then we say that the two sessions are mat hing. (Note that we do not require that
+role =6 role0.) We all Pi and Pj the partners of session s. (Note that Pi may have ompleted a
+session with partner Pj , while Pj may never omplete the mat hing session; ompletion of sessions
+depends on the delivery of the proto ol's message whi h is subje t to adversarial ontrol.)
+Session expiration: an extension to the um. The adversarial a tions against a ke proto ol
+in the um are essentially the same as the generi um atta ker des ribed above, in luding party
+ orruption, session-state reveals, and session-output queries. For larity, we will use the term
+session-key query instead of session-output query when referring to ke sessions (namely, a session-
+key query on a ompleted session provides the atta ker with the value of that session key, the only
+se ret output of a ke session). We add, however, one more element to this model. We will onsider
+a proto ol a tion alled session expiration. A session expiration a tion an be s heduled by the
+atta ker for any ompleted session (Pi ; Pj ; s; role) within party Pi . The e e t of this a tivity is that
+the se ret output of the session, i.e. the session key, is erased from the party's memory. In addition,
+a spe ial note re ording the session expiration is added to Pi 's lo al output, and this ke-session is
+labeled expired, with the following onsequen es. Adversary U is not allowed to perform a session-
+key query for an expired session. In addition, when U orrupts a party, it does not see the lo al
+outputs of the expired sessions (thus, upon party orruption the atta ker learns the party's session-
+keys for unexpired sessions only.) As explained in Se tion 2 expiration of sessions is motivated by
+the ommon pra ti e to limit the life time of session keys and, in parti ular, is instrumental for
+ apturing the notion of perfe t forward se re y. Figure 1 needs to be updated by adding the session
+expiration a tivity to the list of possible a tivities in Step 2.
+Exposed sessions. Finally we introdu e the following terminology. A ke-session (Pi ; Pj ; s; role)
+within Pi is alled lo ally exposed (within Pi ) if the atta ker performed any of the following a tions
+
+                                                     11
+on said session: (i) a session-state reveal; (ii) a session-key query; (iii) orruption of Pi before
+session (Pi ; Pj ; s; role) expired within Pi (this in ludes the ase in whi h Pi is orrupted before the
+session is even invoked or ompleted).
+A ke-session is alled exposed if it is lo ally exposed or it has a mat hing session that is lo ally
+exposed. A session whi h is not exposed is alled unexposed.
+
+3.4 The am Model and Authenti ators
+The material in this Se tion is taken from [2℄.
+The authenti ated-links adversarial model (am). The authenti ated-links model of ompu-
+tation is identi al to the unauthenti ated-links one, with the following fundamental ex eption. The
+am-adversary, denoted A, an a tivate parties only with in oming messages that were generated
+and sent by other parties in the proto ol. That is, the atta ker annot inje t or modify messages
+(ex ept if the spe i ed sender is a orrupted party or if the message belongs to an exposed session).
+In addition, any message may be delivered at most on e. (Namely, A may de ide not to deliver a
+message at all, but if A delivers a message m then it an do so only to the proper destination of
+m, only on e, and without hanging m or the spe i ed sender.)
+    We de ne auth;A analogously to unauth;U , where the omputation is arried out in the
+unauthenti ated-links model.
+Emulation of proto ols. Central to the methodology of [2℄ and the urrent paper is the on ept
+of \proto ol translation", espe ially between the am to the um. We want to be able to start with
+any proto ol  that has some guaranteed fun tionality (or se urity) in the am and generate out
+of it a proto ol 0 with equivalent fun tionality in the um. For this we rst need to formalize the
+notion of \equivalen e". This is done in the next de nition from [2℄ (and whi h follows a general
+approa h used for de ning se ure multi-party proto ols [23, 38, 1, 13℄).
+
+De nition 1 Let  and 0 be an n-party message-driven proto ols. We say that 0 emulates  in
+the unauthenti ated-links model if for any um-adversary U there exists an am-adversary A su h that
+auth;A and unauth0 ;U are omputationally indistinguishable.
+
+
+    Armed with the emulation de nition we an turn to de ne what is meant by \proto ol transla-
+tion" from am to um. This is done in the next de nition [2℄ in terms of \ ompilers" and \authen-
+ti ators".
+
+De nition 2 A ompiler C is an algorithm that takes for input des riptions of proto ols and outputs
+des riptions of proto ols. An authenti ator is a ompiler C where for any proto ol , the proto ol
+C () emulates  in the unauthenti ated-links model.
+Constru ting authenti ators: the mt proto ol. Thus, an authenti ator an take for input
+proto ols designed for ideally authenti ated links (am), and turn them into `equivalent' proto ols for
+adversary- ontrolled unauthenti ated links (um). But an su h authenti ators be onstru ted? The
+answer is yes. The following methodology for onstru ting authenti ators is used in [2℄. Consider
+the following simple proto ol, alled the message transmission (mt) proto ol. The proto ol takes
+empty input. Upon a tivation within Pi on a tion request send(Pi ; Pj ; m), party Pi sends the
+message (Pi ; Pj ; m) to party Pj , and outputs ``Pi sent m to Pj ''. Upon re eipt of a message
+(Pi ; Pj ; m), Pj outputs ``Pj re eived m from Pi ''. When run in the am this proto ol represents
+a perfe tly authenti ated message transmission proto ol. Now, let  be a proto ol that emulates mt
+
+                                                  12
+in unauthenti ated networks. We all su h proto ols mt-authenti ators and we will see that they
+ an be onstru ted eÆ iently. On the basis of , de ne a ompiler C that on input a proto ol
+ produ es a proto ol 0 = C () de ned as follows. When 0 is a tivated at a party Pi it rst
+invokes . Then, for ea h message sent in proto ol , proto ol 0 a tivates  with the a tion request
+for sending the same message to the same spe i ed re ipient. Whenever 0 is a tivated with some
+in oming message, it a tivates  with the same in oming message. When  outputs ``Pi re eived
+m from Pj '', proto ol  is a tivated with in oming message m from Pj . It is shown:
+Theorem 3 ([2℄) Let  be an mt-authenti ator. Then C is an authenti ator.
+    Thus, in order to see that authenti ators an be onstru ted it suÆ es to show onstru tions
+of mt-authenti ators. This is done in [2℄ where several su h s hemes are shown based on di erent
+ ryptographi fun tions (su h as digital signatures and en ryption).
+    In Se tion 6.2 we extend the mt proto ol to a setting of multiple on urrent sessions. We all
+the resultant proto ol smt. It is straightforward to extend the proof of the above theorem to over
+the ase of smt-authenti ators as well.
+
+4    Session-Key Se urity
+
+After having de ned the basi formal model for key-ex hange proto ols and adversarial apabilities,
+we pro eed to de ne what is meant for a key-ex hange proto ol to be se ure. While the previous
+se tions were largely based on the work of [2℄, our de nition of se urity losely follows the de nitional
+approa h of [7℄. The resultant notion of se urity, that we all session-key se urity (or SK-se urity),
+fo uses on ensuring the se urity of individual session-keys as long as the session-key value is not
+obtained by the atta ker via an expli it key exposure (i.e. as long as the session is unexposed { see
+the terminology in the previous se tion). We want to apture the idea that the atta ker \does not
+learn anything about the value of the key" from intera ting with the key-ex hange proto ol and
+atta king other sessions and parties. As it is standard in the semanti -se urity approa h this is
+formalized via the infeasibility to distinguish between the real value of the key and an independent
+random value.
+    We stress that this formulation of SK-se urity is very areful about tuning the de nition to
+o er enough strength as required for the use of key-ex hange proto ols to realize se ure hannels
+(Se tion 6), as well as being realisti enough to avoid over-kill requirements whi h would prevent
+us from proving the se urity of very useful proto ols (Se tion 5). We further dis uss these aspe ts
+after the presentation of the de nition.
+
+4.1 De nition of SK-Se urity
+We rst present the de nition for the um. The formalization in the am is analogous. We start by
+de ning an \experiment" where the atta ker U hooses a session in whi h to be \tested" about
+information it learned on the session-key; spe i ally, we will ask the atta ker to di erentiate the
+real value of the hosen session key from a random value. (Note that this experiment is an artifa t
+of the de nition of se urity, and not an integral part of the a tual key-ex hange proto ols and
+adversarial intervention.)
+    For the sake of this experiment we extend the usual apabilities of the adversary, U , in the
+um by allowing it to perform a test-session query. That is, in addition to the regular a tions of U
+against a key-ex hange proto ol , we let U to hoose, at any time during its run, a test-session
+
+                                                  13
+among the sessions that are ompleted, unexpired and unexposed at the time. Let  be the value of
+the orresponding session-key. We toss a oin b, b R f0; 1g. If b = 0 we provide U with the value .
+Otherwise we provide U with a value r randomly hosen from the probability distribution of keys
+generated by proto ol . The atta ker U is now allowed to ontinue with the regular a tions of a
+um-adversary but is not allowed to expose the test-session (namely, it is not allowed session-state
+reveals, session-key queries, or partner's orruption on the test-session or its mat hing session.6 )
+At the end of its run, U outputs a bit b0 (as its guess for b).
+We will refer to an atta ker that is allowed test-session queries as a ke-adversary.
+
+De nition 4 A ke proto ol  is alled SK-se ure if the following properties hold for any ke-
+adversary U in the um.
+   1. Proto ol  satis es the property that if two un orrupted parties omplete mat hing sessions
+      then they both output the same key; and
+   2. the probability that U guesses orre tly the bit b (i.e., outputs b0 = b) is no more than 1/2 plus
+      a negligible fra tion in the se urity parameter.
+If the above properties are satis ed for all ke-adversaries in the am then we say that  is SK-se ure
+in the am.
+
+    The rst ondition is a \ onsisten y" requirement for sessions ompleted by two un orrupted
+parties. We have no requirement on the session-key value of a session where one of the partners
+was orrupted before the session ompleted { in fa t, most ke proto ols allow a orrupted party to
+strongly in uen e the ex hanged key. The se ond ondition is the \ ore property" for SK-se urity.
+We note that the term `negligible' refers, as ustomary, to any fun tion (in the se urity parameter)
+that diminishes asymptoti ally faster than any polynomial fra tion. (This formulation allows, if
+so desired, to quantify se urity via a on rete se urity treatment. In this ase one quanti es the
+atta ker's power via spe i bounds on omputation time, number of orruptions, et ., while its
+advantage is bounded through a spe i parameter ".)
+Remark. We highlight three aspe ts of De nition 4.
+     The atta ker an keep running and atta king the proto ol even after re eiving the response
+       (either real or random) to its test-session query. This ability (whi h represents a substantial
+       strengthening of se urity relative to [7℄, see also [6℄) is essential for proving the main property
+       of SK-se urity shown in this paper, namely its guarantee of se urity when used to generate
+       se ure hannels as des ribed in Se tion 6. See the Appendix for histori ba kground on, as
+       well as some te hni al rationale for this requirement.
+     The atta ker is not allowed to orrupt partners to the test-session or issue any other exposure
+        ommand against that session while unexpired. This re e ts the fa t that there is no way
+       to guarantee the se ure use of a session-key that was exposed via an atta ker's break-in
+       (or ryptanalysis). In parti ular, this restri tion is instrumental for proving the se urity of
+       spe i important proto ols (e.g., DiÆe-Hellman key ex hange) as done in Se tion 5.
+   6
+     We stress, however, that the atta ker is allowed to orrupt a partner to the test-session as soon as the test-session
+(or its mat hing session) expires at that party. See the dis ussion below. This may be the ase even if the other
+partner has not yet expired the mat hing session or not even ompleted it.
+
+
+
+                                                           14
+    The above restri tion on the atta ker by whi h it annot orrupt a partner to the test-session
+     is lifted as soon as the session expires at that partner. In this ase the atta ker should remain
+     unable to distinguish between the real value of the key from a random value. This is the basis
+     to the guarantee of \perfe t forward se re y" provided by our de nition and further dis ussed
+     in Se tion 4.2.
+    We stress that in spite of its \ ompa t" formulation De nition 4 is very powerful and an be
+shown to ensure many spe i properties that are required from a good key-ex hange proto ol (see,
+for example, hapter 12 of [37℄). Some of these properties in lude the guarantee that session-keys
+belong to the right probability distribution of keys (ex ept if one of the partners is orrupted at
+time of ex hange), the \authenti ity" of the ex hange (namely, a orre t and onsistent binding
+between keys and parties' identities), resistan e to man-in-the-middle atta ks (for proto ols proven
+SK-se ure in the um), resistan e to known-key atta ks, forward se re y, and more. However, we
+note that all these properties (whi h are sometimes listed as a repla ement to a formal de nition
+of se urity) in ombination do not suÆ e to guarantee the most important aspe t of key-ex hange
+se urity that SK-se urity enjoys: namely, the omposition of the key-ex hange proto ols with
+ ryptographi fun tions to enable se ure hannels (e.g., the original de nition of se urity in [7℄
+does satisfy the above list of properties but is insuÆ ient to guarantee se ure hannels).
+    We nally remark that De nition 4 makes se urity requirements from a ke proto ol only in ase
+that the proto ol ompletes ke-sessions. No guarantee is made that ke-sessions will ever return,
+or that they will not be aborted, i.e., that the orresponding session key will not be null. (In fa t,
+a ke proto ol where all ke-sessions \hang" and never return satis es the de nition.) One an
+add an expli it termination requirement for sessions in whi h the parties are un orrupted and all
+messages are orre tly delivered by the atta ker. For simpli ity, we hoose to leave the analysis of
+the termination properties of proto ols out of the s ope of the de nition of se urity.
+
+4.2 Forward Se re y
+Informally, the notion of \perfe t forward se re y" (pfs) [26, 19℄ is stated as the property that
+\ ompromise of long-term keys does not ompromise past session keys". In terms of our formalism
+this means that even if a party is orrupted (in whi h ase all its stored se rets { short-term and
+long-term { be ome known to the atta ker) then nothing is learned about sessions within that party
+that were previously unexposed and expired before the party orruption happened.
+    The provision that expired session-keys remain indistinguishable from random values even if a
+partner to that session is orrupted guarantees the perfe t forward se re y of SK-se ure proto ols.
+Put in other words, when proving a proto ol to be SK-se ure using De nition 4 one automati ally
+gets a proof that that proto ol guarantees pfs.
+    On the other hand, while pfs is a very important se urity property it is not required for
+all appli ation s enarios, e.g., when only authenti ation is required, or when short-term se re y
+suÆ es. Indeed, it is ommon to nd in pra ti e proto ols that do not provide pfs and still are
+not onsidered inse ure. One su h typi al ase are \key-transport proto ols" in whi h publi key
+en ryption is used to ommuni ate a session-key from one party to another. (In this ase, even
+if session-keys are erased from memory when no longer required, the orruption of a party may
+allow an atta ker to ompute, via the dis overed long-term private keys, all the past session-keys.)
+Due to the importan e of su h proto ols (they are ommonly used in, e.g., SSL), and given that
+a hieving pfs usually has a non-negligible omputational ost, we de ne a notion of \SK-se urity
+without pfs" by simply disallowing the proto ol's a tion of key expiration. That is, under this
+
+                                                 15
+modi ed model, session-keys never expire. This results in a weaker notion of se urity sin e now by
+virtue of De nition 4 the atta ker is never allowed to orrupt a partner to the test-session (or in
+other words, this weaker de nition of se urity does not guarantee the se urity of a session-key for
+whi h one of the partners is ever orrupted).
+
+De nition 5 We say that a ke proto ol satis es SK-se urity without pfs if it enjoys SK-se urity
+relative to any ke-adversary in the um that is not allowed to expire keys. (Similarly, if the above
+holds for any su h adversaries in the am then we say that  is SK-se ure without pfs in the am.)
+
+Se tion 5.3 des ribes a proto ol that satis es SK-se urity without pfs but not regular SK-se urity.
+
+5    SK-Se ure Proto ols
+
+This se tion demonstrates the usability of our de nition of SK-se urity for proving the se urity of
+some simple and important key-ex hange proto ols. One is the original DiÆe-Hellman proto ol, the
+other is a simple \key transport" proto ol based on publi -key en ryption. We rst show that these
+proto ols are se ure in the simpler authenti ated-links model (am). Then, using the methodology
+from [2℄ we an apply to these proto ols a variety of (symmetri or asymmetri ) authenti ation
+te hniques to obtain key-ex hange proto ols that are se ure in the realisti um model. Namely,
+applying any mt-authenti ator (see Se tions 2.3 and 3.4) to the messages of the am-proto ol results
+in a se ure ke proto ol in the um. The next Theorem states that this methodology does work for
+our purposes.
+
+Theorem 6 Let  be a SK-se ure key-ex hange proto ol in the am with pfs (resp., without pfs)
+and let  be an mt-authenti ator. Then 0 = C () is a SK-se ure key-ex hange proto ol in the
+um with pfs (resp., without pfs).
+
+
+We remark that the following proof is somewhat more general, and proves that any authenti ator
+(not only mt-authenti ators) is suÆ ient for proving the theorem.
+Proof: We start by noting that the theorem's statement does not follow dire tly from the results of
+[2℄ (spe i ally from Theorem 3 in that paper) sin e there the guarantee for se ure transformation
+between models is proven for the basi um and am. Here we need to extend the proof to apture the
+additional test-session queries that we allow the ke-adversary against the ke proto ol. Also worth
+noting is that our um and am are ri her than the ones in [2℄ (e.g. they in lude session expiration
+and session-state reveals), however it is easy to see that the proof of Theorem 3 in [2℄ will work for
+these adversary a tivities as well.
+    Based on these fa ts we pro eed to prove that if proto ol  satis es SK-se urity (De nition 4)
+in the am then proto ol 0 = C () satis es that de nition in the um. We note that the proof
+is the same for the ases of SK-se urity with or without pfs. Consider a proto ol  that satis es
+De nition 4 in the am, and let U be a ke-adversary against 0 in the um. We rst observe that 0
+satis es Requirement 1 of De nition 4 in the um with respe t to U (otherwise the global output of
+running 0 in the um with U is easily distinguishable from the global output of running  in the
+am with any am ke-adversary, in ontradi tion to the fa t that C is an authenti ator).
+    Next we on entrate on demonstrating that 0 satis es Requirement 2 of De nition 4 in the
+um. Spe i ally, given a ke-adversary U that guesses the bit b in the game of De nition 4 in the
+um with probability 1=2 + , we onstru t a ke-adversary A that guesses the bit b in the game of
+
+
+
+                                                 16
+De nition 4 in the am with probability 1=2 + 0 , where 0 is polynomial in  and in the se urity
+parameter.
+   The onstru tion of A pro eeds in few steps, as follows:
+  1. Given U , we rst onstru t a regular um-adversary U 0 against 0 (i.e., U 0 is not allowed to
+     make test-session queries). Adversary U 0 runs adversary U and follows its instru tions, with
+     the following ex eption: When U hooses a test-session s, U 0 queries session s and hooses
+     b R f0; 1g. If b = 0 then U 0 hands the key of session s to U . If b = 1 then U 0 hands U a value
+     drawn from the distribution of session keys. Next, U 0 returns to following the instru tions of
+     U . When U halts, U 0 outputs the trans ript of its intera tion with U and halts.
+  2. Sin e 0 = C (), we have that there exists an adversary, A0 in the am whose output is
+     indistinguishable from the output of U 0 .
+  3. Given adversary A0 , we onstru t the ke-adversary A promised above. Re all that A intera ts
+     in the am with the game of De nition 4. A starts by hoosing a session s at random out of
+     the sessions initiated by A0 . Next, A follows the instru tions of A0 ; when the hosen session
+     s is established, A announ es s to be its test session. In addition, if A0 queries session s (and
+     session s is not yet exposed) then A feeds the obtained value for the key of session s to A0 .
+     Next A returns to following the instru tions of A0 . When A0 halts, A inspe ts the output of
+     A0. Re all that the output of A0 mimi s the output of U 0, whi h in turn des ribes a trans ript
+     of an exe ution of U . If in that trans ript of U the test session is session s then A outputs
+     the bit b0 that U outputs in that trans ript. Otherwise, A outputs a randomly hosen bit.
+We analyze the su ess probability of A under the assumption that the output of A0 and U 0 are
+identi ally distributed. A ounting for the fa t that the two outputs are only omputationally
+indistinguishable is done in standard ways.
+    Let ` be an upper bound on the number of sessions invoked by U , the advantage (i.e., the
+probability of su ess over 1=2) of A is 1=` times its advantage onditioned on the event that the
+test session hosen by U (in the output of A0 ) equals s. For the rest of the analysis we assume that
+the test session hosen by U (in the output of A0 ) equals s.
+    Let pb denote the probability that U outputs 1 when intera ting with the game of De nition 4
+in the um, when the value of the \real or random" bit is b. We have that jpreal prandomj  . Also,
+when run within U 0 , U outputs 1 with probability (preal + prandom)=2. Consider the following ases:
+  1. Assume that A is given the \real" key of the test session s. In this ase, the view of U
+     (within the output of A0 that is run inside A) is distributed identi ally to its view when U 0
+     intera ts with 0 in the um. In this ase U (and thus also A) outputs 1 with probability
+     (preal + prandom )=2.
+  2. Assume that A is given the \random" value for the key of the test session s. In this ase,
+     the view of U (within the output of A0 that is run inside A) is distributed identi ally to its
+     view when intera ting in the game of De nition 4 in the um, onditioned on the event that
+     it is given a \random" value for the key of the test session. In this ase U (and thus also A)
+     outputs 1 with probability prandom.
+It follows that, when A0 perfe tly simulates U 0 , the advantage of A is =2`.                      2
+
+
+                                                 17
+5.1 Two-move DiÆe-Hellman in the am
+We demonstrate that under the De isional DiÆe-Hellman (DDH) assumption (see below) the ` las-
+si ' two-move DiÆe-Hellman key-ex hange proto ol designed to work against eavesdroppers-only is
+SK-se ure in the am. We denote this proto ol by 2dh and des ribe it in Figure 2 (here and in the
+sequel all exponentiations are modulo the de ned prime p).
+Using Theorem 6 we an apply any authenti ator to this proto ol to obtain a se ure DiÆe-Hellman
+ex hange against realisti um atta kers. For illustration, a parti ular instan e of su h a SK-se ure
+proto ol in the um, using digital signatures for authenti ation, is shown in the next se tion. Other
+  avors of authenti ated DH proto ols an be derived in a similar way by using other authenti ators
+(e.g. based on publi key en ryption or on pre-shared keys [2℄); see Se tion 5.4.
+
+                                                Proto ol 2dh
+
+
+   Common information: Primes p; q , q=p 1, and g of order q in Zp .
+   Step 1:   The initiator, Pi , on input (Pi ; Pj ; s), hooses x R Zq and sends (Pi ; s; = g x ) to Pj .
+   Step 2:  Upon re eipt of (Pi ; s; ) the responder, Pj , hooses y R Zq , sends (Pj ; s; = g y ) to Pi ,
+         erases y , and outputs the session key = y under session-id s.
+   Step 3:  Upon re eipt of (Pj ; s; ), party Pi omputes        0 =   x , erases x, and outputs the session
+         key 0 under session-id s.
+
+                     Figure 2: The two-move DiÆe-Hellman proto ol in the am
+
+
+The De isional DiÆe-Hellman (DDH) assumption is as follows.
+
+Assumption 7 Let k be a se urity parameter. Let p; q be primes, where q is of length k bits
+and q=p 1, and g be of order q in Zp . Then the probability distributions of quintuples Q0 =
+fhp; g; gx ; gy ; gxy i : x; y R Zq g and Q1 = fhp; g; gx ; gy ; gz i : x; y; z R Zq g are omputationally
+indistinguishable.
+Theorem 8 Assuming the De isional DiÆe-Hellman (DDH) assumption, proto ol 2dh is SK-
+se ure in the am.
+Proof: To see that the rst requirement of De nition 4 is satis ed, note that if both Pi and Pj
+are un orrupted during the ex hange of the key and both omplete the proto ol (i.e. the three
+steps of the proto ol are ompleted by Pi and Pj ) then they both establish the same key (whi h is
+  = 0 = gxy mod p). Note that the session identi er s uniquely binds the values of gx and gy to
+these parti ular mat hing sessions and di erentiates them from other exponentials that the parties
+may ex hange in other (possibly simultaneous) sessions.
+    We show that the se ond requirement of De nition 4 is also satis ed by proto ol 2dh. Assume
+to the ontrary that there is a ke-adversary A in the am against proto ol 2dh that has a non-
+negligible advantage in guessing orre tly whether the response to a test-query is real or random.
+Out of this atta ker A, we onstru t an algorithm D that distinguishes between the distributions
+Q0 and Q1 with non-negligible probability; thus rea hing a ontradi tion with Assumption 7. The
+input to D is denoted by (p; g;  ;  ;  ) and is hosen from Q0 or Q1 ea h with probability 1/2.
+
+                                                       18
+Let ` be an upper bound on the number of sessions invoked by A in any intera tion. Algorithm D
+uses adversary A as a subroutine and is des ribed in Figure 3.
+
+                                              Distinguisher   D
+   Pro eed as follows, on input (p; g;  ;  ;  ):
+      1. Choose r R f1 : : : `g.
+      2. Invoke A, on a simulated intera tion in the am with parties P1 ; :::; Pn running 2dh. Hand A
+         the values p; g as the publi parameters for the proto ol exe ution.
+      3. Whenever A a tivates a party to establish a new session (ex ept for the r-th session) or to
+         re eive a message, follow the instru tions of 2dh on behalf of that party. When a session is
+         expired at a player erase the orresponding session key from that player's memory. When
+         a party is orrupted or a session (other than the r-th session) is exposed, hand A all the
+         information orresponding to that party or session as in a real intera tion.
+      4. When the r-th session, say (Pi ; Pj ; s), is invoked within Pi to ex hange a key with Pj , let Pi
+         send the message (Pi ; s;  ) to Pj .
+      5. When Pj is invoked to re eive (Pi ; s;  ), let Pj send the message (Pj ; s;  ) to Pi .
+      6. If session (Pi ; Pj ; s) is hosen by A as the test-session, then provide A with    as the answer
+         to this query.
+      7. If the r-th session (Pi ; Pj ; s) is ever exposed, or if a session di erent than the r-th session
+         is hosen as the test-session, or if A halts without hoosing a test-session then D outputs
+         b0 R f0; 1g and halts.
+      8. If A halts and outputs a bit b0 , then D halts and outputs b0 too.
+
+                              Figure 3: Building a distinguisher for DDH
+
+
+    First note that the run of A by D (up to the point where A stops or D aborts A's run) is
+identi al to a normal run of A against proto ol 2dh.
+    Consider the ase in whi h the test session s hosen by A oin ides with the session hosen at
+random by D (i.e., the r-th session as hosen in Step 1). In this ase, the response to the test-query
+by A is  . Thus, if the input to D ame from Q0 then the response was the a tual value of the
+key ex hanged between Pi and Pj during the test-session s (sin e, by onstru tion, the session key
+ex hanged in Steps 4 and 5 of Figure 3 is  = gxy ). On the other hand, if the input to D ame
+from Q1 then the response to the test query was a random exponentiation, i.e. a random value from
+the distribution of keys generated by the proto ol. In addition, the input to D was hosen with
+probability 1/2 from Q0 and with probability 1/2 from Q1 and then the distribution of responses
+provided by D to the test query of A is the same as spe i ed by De nition 4. In this ase, the
+probability that A guesses orre tly whether the test value was \real" or \random" is 1=2 + " for
+non-negligible ". By the above argument this is equivalent to guessing whether the input to the
+distinguisher D ame from Q0 or Q1 , respe tively. Thus, by outputting the same bit as A we get
+that the distinguisher D guesses orre tly the input distribution Q0 or Q1 with the same probability
+1=2 + " as A did.
+    Now onsider the ase in whi h the r-th session is not hosen as a test-session. In this ase
+D always ends outputting a random bit, and thus its probability to guess orre tly the input
+                                                      19
+distribution is 1/2.
+    Sin e the rst ase (in whi h the test-session and the r-th session oin ide) happens with
+probability 1=` while the other ase happens with probability 1 1=` we get that the overall
+probability of D to guess orre tly is 1=2 + "=`, and thus D su eeds in distinguishing Q0 from Q1
+with non-negligible advantage.
+                                                                                                                     2
+5.2 SK-se ure DiÆe-Hellman Proto ol in the um
+Here we apply the signature-based authenti ator of [2℄ to the proto ol 2dh from Figure 2 to obtain
+a DiÆe-Hellman key-ex hange that is SK-se ure in the um. We present the resultant proto ol in
+Figure 4 (it is very similar to a proto ol spe i ed in [29℄). Its SK-se urity follows from Theorems
+6 and 8.
+
+                                                Proto ol sig-dh
+
+
+   Initial information: Primes p; q , q=p 1, and g of order q in Zp . Ea h player has a private key for a
+   signature algorithm sig, and all have the publi veri ation keys of the other players.
+   Step 1:   The initiator, Pi , on input (Pi ; Pj ; s), hooses x R Zq and sends (Pi ; s; = g x ) to Pj .
+   Step 2:  Upon re eipt of (Pi ; s; ) the responder, Pj , hooses y R Zq , and sends to Pi the message
+         (Pj ; s; = g y ) together with its signature sigj (Pj ; s; ; ; Pi ); it also omputes the session key
+           = y and erases y .
+   Step 3:   Upon re eipt of (Pj ; s; ) and Pj 's signature, party Pi veri es the signature and the or-
+         re tness of the values in luded in the signature (su h as players identities, session id, the
+         value of exponentials, et .). If the veri ation su eeds then Pi sends to Pj the message
+         (Pi ; s; sigi (Pi ; s; ; ; Pj )), omputes 0 = x , erases x, and outputs the session key 0 under
+         session-id s.
+   Step 4:   Upon re eipt of the triple (Pi ; s; sig ), Pj veri es Pi 's signature sig and the values it in ludes.
+         If the he k su eeds it outputs the session key under session-id s.
+
+             Figure 4: DiÆe-Hellman proto ol in the um: authenti ation via signatures.
+
+
+Remarks on proto ol sig-dh.            The proto ol is the result of applying the signature-based
+authenti ator of [2℄ to ea h of the ows in the 2-pass DiÆe-Hellman proto ol 2dh of Figure 2,
+and joining (piggy-ba king) the ommon ows. The authenti ators use the values and (the
+DH exponentials) as the hallenges required by these authenti ators. This assumes (as spe i ed
+in proto ol 2dh) that these exponentials are hosen afresh for ea h new ex hange. We remark
+that this dual use of and as exponentials and as hallenges is done to simplify the proto ol but
+separate hallenges ould be sent by the parties and in luded under the signature. It is worth noting
+that the identity of the destination party in luded under the signatures is part of the spe i ation
+of the signature-based authenti ator of [2℄ and is fundamental for the se urity of proto ol sig-dh
+(without them the proto ol is inse ure; see [19℄).
+The des ription of sig-dh in Figure 4 assumes, as formalized in our model, that the value s of
+the session-id is provided to the parties. In pra ti e, one usually generates the session identi er
+s as a pair (s1 ; s2 ) where s1 is a value hosen by Pi and di erent (with very high probability)
+
+                                                        20
+from all other su h values hosen by Pi in his other sessions with Pj . Similarly, s2 is hosen by Pj
+with an analogous uniqueness property. These values s1 ; s2 an be ex hanged by the parties as a
+prologue to the above proto ol (this may be the ase of proto ols that implement su h a prologue
+to ex hange some other system information and to negotiate ex hange parameters; see for example
+[28℄). Alternatively, s1 an be in luded by Pi in the rst message of sig-dh, and s2 be in luded by
+Pj in the se ond message. In any ase, it is important for the se urity of the proto ol that these
+values be in luded under the parties' signatures.
+
+5.3 A publi -key en ryption-based proto ol without pfs
+The proto ol des ribed in this se tion is based on publi key en ryption s hemes se ure against
+ hosen iphertext atta ks. We show that this proto ol satis es De nition 5, i.e. SK-se urity
+without pfs, in the am. That is, the proto ol does not provide forward se re y of the session keys
+(an atta ker who breaks into a party may ompromise all the keys ex hanged by this party in the
+past even if these keys are erased from that party's memory). Formally, we onsider that session
+keys never expire. The proto ol an be made into a SK-se ure without pfs proto ol in the um by
+using any authenti ator (Theorem 6).
+    Let (G; E; D) be a key-generation, en ryption and de ryption algorithms, respe tively, of a
+publi -key en ryption s heme se ure against hosen iphertext atta ks (CCA). (See, for instan e,
+[20, 4, 17℄). Let k be the se urity parameter. Assume that ea h party Pi has invoked G(k) to get
+a pair (ei ; di ) of en ryption and de ryption keys, and all parties have the publi en ryption key ei
+of the other parties. In addition, let ffg2f0;1gk be a pseudorandom fun tion family (as in [22℄).
+The proto ol, denoted en , is des ribed in Figure 5.
+
+                                               Proto ol en
+
+
+   Pro eed as follows, given se urity parameter k .
+   Step 1: The initiator, Pi , on input (Pi ; Pj ; s), hooses  R f0; 1gk and sends (Pi ; s; Eej ()) to Pj .
+         Next, Pi outputs the session key  = f (Pi ; Pj ; s) under session-id s.
+   Step 2:  Upon re eipt of (Pi ; s; ) the responder, Pj , omputes 0 = Ddj ( ). If the de ryption
+         algorithm does not reje t the iphertext, then Pj outputs the session key  0 = f (Pi ; Pj ; s)
+                                                                                                 0
+
+         under session-id s.
+
+                     Figure 5: A ke proto ol based on CCA-se ure en ryption.
+
+
+Remark.         For ensuring the se urity of proto ol en we need to assume that the de ryption
+operation 0 = Ddj ( ) (in luding the validity he k for the iphertext ) and the omputation
+of the pseudorandom value f0 (Pi ; Pj ; s) in Step 2 are performed su h that neither the long-term
+de ryption key dj or the temporary value 0 appear as part of the state of session s. Namely, we
+need to assume that these operations are done in a separate se ure module and only the value
+0 = f0 (Pi ; Pj ; s) is returned to the session state. The assumption that long-term private keys are
+not part of the session state is a fundamental requirement in a model as ours that di erentiates
+session-state orruptions from total orruptions (see Se tion 2.2). The need to hide 0 from the
+session state is a spe i requirement of the en proto ol and it is illustrated by the following atta k.
+Say that 0 is returned to the session state, then an atta ker ould ompromise an unexposed session
+
+                                                      21
+(Pi ; Pj ; s) as follows. It orrupts party Pl ; l 6= i; j , and initiates an en session (Pl ; Pj ; s0 ) between
+the orrupted Pl and Pj in whi h Pl sends to Pj the same iphertext sent in session s from Pi to
+Pj . On e Pj de rypts and stores the temporary value 0 in the state of session s0 , the atta ker
+performs a session-state reveal and learns 0 . Now it an also ompute the value of the session
+key orresponding to the unexposed session s. Thus, this atta k (and the proof of Theorem 9)
+show the are needed in spe ifying and implementing the en proto ol if we require resistan e to
+session-state reveals. Whether this is a realisti risk or not may depend on parti ular appli ations
+and s enarios. In any ase, if a separate module for the above operations annot be assumed then
+the proto ol be omes inse ure in our model but is still se ure in a model where session states an
+only be revealed via total orruptions (i.e., a weakened model where session-state reveals are not
+ onsidered as a separate atta ker a tion).
+
+Theorem 9 If the en ryption (G; E; D) is CCA-se ure and the family ff g2f0;1gk is pseudoran-
+dom, then proto ol en is SK-se ure without pfs in the authenti ated links model (am).
+
+Proof: It is easy to see that the rst ondition of De nition 4 is satis ed by proto ol en (that
+is, un orrupted parties that omplete mat hing sessions output the same session-key). The ore of
+the proof is in proving the se ond ondition of De nition 4 in the ase where keys are not expired.
+    We start by de ning a \game" whi h aptures the hosen- iphertext se urity of the en ryption
+fun tion E in ombination with the pseudorandom family ff g2f0;1gk . We will then show that an
+atta ker that breaks the SK-se urity of proto ol en an also win in this game and then break the
+en ryption fun tion E . The game is de ned in Figure 6.
+
+                                          The en ryption game
+
+
+    The parties to the game are G and B (for good and bad). G possesses a pair of publi and private
+    keys, e and d (generated via the key generation algorithm G). B knows e but not d.
+    The game pro eeds in phases:
+    Phase 0:  G provides B with a hallenge iphertext  = Ee (0 ) for 0 R f0; 1gk .
+    Phase 1: B sends a pair ( ; t) to G who responds with f (t) where  = Dd ( ). This is repeated
+         a polynomial (in k ) number of times with ea h pair being hosen adaptively by B (i.e., after
+         seeing G 's response to previous pairs).
+    Phase 2: B sends a test string t to G . Then G hooses a random bit b       f0; 1g. If b = 0 then
+                                                                           R
+
+         G responds with f0 (t ) where 0 is the value en rypted by G in phase 0. If b = 1 then G
+                                 
+          responds with a random string r of the same length as f0 (t ).
+    Phase 3:   Same as Phase 1.
+    Phase 4:B outputs a bit b0 .
+    And the winner is... B if and only if b = b .
+                                               0
+
+
+
+          Figure 6: A game that aptures the CCA-se urity of the en ryption fun tion E
+
+
+    We state the following Lemma (the proof uses standard arguments and, in parti ular, is similar
+
+
+
+                                                      22
+to the proof of the en ryption-based authenti ator from [2℄).
+
+Lemma 10 Assume that the en ryption s heme (G; E; D) is CCA-se ure and the family ff g2f0;1gk
+is pseudorandom. Then if the pair (  ; t ) is not queried by B during Phases 1 and 3 the probability
+that B wins in the above game is no more than 1/2 plus a negligible fra tion.
+     We note that B is not allowed (in the lemma formulation) to query the pair (  ; t ) but it is
+allowed to in lude, separately, the values  and t in other pairs.
+     We now pro eed to show that if there is an am ke-atta ker A that breaks the SK-se urity of
+proto ol en in the sense that it an distinguish between real and random values of a test session
+while not being allowed to orrupt the partners to this session, then there is an eÆ ient algorithm
+B that wins in the above game with non-negligible probability over 1/2.
+     We build su h B. Let G be the party against whi h B plays the game. G holds a private
+de ryption key d and publi en ryption key e. The game starts with G sending a hallenge iphertext
+  to B. Then, B pro eeds to Phase 1 of the game doing the following. It builds a virtual s enario for
+the run of proto ol en , and a tivates the atta ker A against this virtual run. Among all n parties
+in this run, B hooses one at random, all it Pj . For all other virtual players B hooses private
+keys (using the key generation algorithm G) and provides A with the orresponding publi keys.
+B does not hoose a private key for Pj; instead it provides A with e (the publi key of G ) as the
+publi key of Pj . Also, B hooses a random session among the sessions where Pj is the responder.
+We denote this session as s , and its initiator as Pi (i.e. the hosen session is (Pi ; Pj ; s )).
+     All operations s heduled by A are performed by B on behalf of the virtual players in the
+following way. All session establishments are exe uted by B a ording to the proto ol ex ept for
+the establishment of session s . When A s hedules the establishment of session s between Pi and
+Pj , B sends the message (Pi ; s ;  ) to Pj on behalf of Pi . Here  is the hallenge iphertext
+provided to B by G in Phase 0.
+     All exposure of session keys performed by A, via session or party orruptions, that do not involve
+Pj as the responder are answered by B using his knowledge of private keys. When A orrupts a
+party other than Pj and Pi , then B also provides A with the private key of that party. If a session
+s= 6 s between a player P and Pj in whi h the latter a ts as responder is exposed by A, then B
+provides the value of that key to A in the following way. If P was un orrupted at the time that s
+was established then B was the one to hoose the key  en rypted by P and then it knows it. If P
+was orrupted then all B knows is the message (P; s; ) sent from P to Pj as step 1 in the proto ol.
+In this ase B presents to G (as part of Phase 1) the pair ( ; t) where t = (P; Pj ; s). The value
+ returned by G is the value that B provides to A as the queried session key (note that by our
+assumption in the Remark pre eding the Theorem the only information exposed in a session-key
+query or in session-state reveal is the value of the session key so no other information needs to be
+returned by B to A).
+     If at any point A queries or reveals session s , orrupts Pi or Pj , or hooses a test session
+di erent than s , B pro eeds as follows. It aborts the run of A and moves to Phase 2 sending an
+arbitrary value t to G . After getting G 's response it moves dire tly to Phase 4 outputting a random
+bit b0 .
+     If A de ides to be tested on session s then B moves to Phase 2 and sends to G the value
+t = (Pi ; Pj ; s ). The response from G is passed by B to A as the value of the key for session s .
+ 
+     B enters Phase 3. It keeps running A in the same way as des ribed for Phase 1 above (note
+that in this ase A is not allowed to expose s ). When A outputs a bit b0 and stops, then B moves
+to Phase 4 and outputs the same bit b0 as A did.
+
+                                                  23
+    We rst note that the above behavior of B in the game is a legal one, namely, that it never asks
+the pair (  ; t ) from G in phases 1 and 3. This is easy to see sin e all pairs queried by B during
+these phases ontain a value t di erent than t . Indeed all the values t queried by B have the form
+of a triple (P; Q; s) where P; Q are player identities and s a session identi er. Thus, due to the
+uniqueness of session-id's the value t = (Pi ; Pj ; s ) o urs only with relation to session s whi h
+is never queried by B from G in phases 1 and 3.
+    Now we prove that B wins the game against G with non-negligible advantage. First, note that
+in the ases where B aborts the run of A before ompletion it outputs a random bit b0 so its han es
+to win in this ase is exa tly 1/2. In the ase where A ends with output b0 the han es of B to win
+are exa tly the same as those of A to guess orre tly whether the test value was real or random.
+This probability is, by assumption, non-negligible over 1/2. The later ase happens whenever the
+tested session hosen by A is the same s hosen (randomly) by B. Sin e this event happens with
+non-negligible probability (1=` where ` is an upper bound on the number of sessions established in
+the proto ol run) then the overall advantage of B is non-negligible.                                   2
+Remarks on Proto ol en .
+   1. The derivation of the session key via a pseudorandom fun tion applied to the session and
+      parties' identi ers is of fundamental importan e for the se urity of the proto ol. Had the
+      session key be just  then the proto ol would be inse ure (even in the am!). In this ase the
+      atta ker sees that Pi sends the iphertext Eej () to Pj . Then party Pl , that we assume is
+       ontrolled by the atta ker, sends the same iphertext to Pj . Now, Pj has established the same
+      session-key with two di erent parties. This a serious se urity aw7 that breaks SK-se urity:
+      the atta ker an now query Pj for the key ex hanged with Pl and in this way to learn the key
+      that Pj ex hanged with Pi .
+   2. The a tual se urity of proto ol en an be improved by spe ifying that sessions do expire
+      at the initiator (and the orresponding keys removed from its memory). This preserves SK-
+      se urity and adds onsiderably to the pra ti al se urity of the proto ol. For example, onsider
+      an appli ation where the initiators are mobile devi es, vulnerable to the stealing of the private
+      key, ommuni ating with a well-prote ted gateway. In this ase, if we let keys to expire at
+      the initiator, then nding the de ryption key of su h a mobile devi e is of no help to the
+      atta ker in re overing past (expired) session keys. The atta ker must break the gateway to
+      obtain these keys.
+   3. Another stronger version of this proto ol is obtained by letting ea h party send the other a
+      key as in en and deriving the shared session key in a way that requires knowledge of both
+      en rypted keys. In this ase, the proto ol still does not provide pfs but (if keys are erased
+      from memory when the session is expired) the only way to re over a past key is to nd the
+      private keys of both initiator and responder. This is the basis to the DH-less mode of SKEME
+      [32℄. However, note that our de nition of SK-se urity (with pfs) would reje t su h a proto ol
+      as se ure. A weakened version of the de nition that is satis ed by the proto ol is obtained if
+      one requires that at most one of the partners to the modi ed session an be orrupted (and
+      only after the key is expired at that party).
+   7
+   [19℄ des ribes an atta k in whi h a dishonest ustomer exploits a key-ex hange weakness to defraud a bank and a
+honest ustomer; the same atta k an be mount here with Pj a ting as the bank, and Pi and Pl a ting as the honest
+and heating ustomers, respe tively. See [19℄ for the details.
+
+
+
+
+                                                       24
+5.4 Proto ols based on shared keys
+In order to further illustrate the usability of our methodology we show how to apply it to key-
+ex hange proto ols that assume that the two peers initially share a se ret key and use this key
+to authenti ate the ex hange of new key material. This \key refreshment" fun tionality is very
+important in network se urity proto ols (e.g. [32, 28℄). We show examples of SK-se ure proto ols
+with and without pfs.
+   These examples use the following MAC-based authenti ator that assumes a shared key ij
+between a pair of parties Pi ; Pj . Let f denote a se ure MAC fun tion, and ij be a random key for
+f hosen under se urity parameter k. The authenti ator is de ned as follows: when Pi wants to
+send a message to a re ipient Pj , the latter sends a hallenge r R f0; 1g2k to Pi , and Pi sends the
+message m together with the authenti ation tag fij (Pj ; r; m). The se urity of this authenti ator
+ an be proven in a way similar to the proof of the signature-based authenti ator from [2℄.
+   Applying this authenti ator to the basi two-move DiÆe-Hellman proto ol 2dh in the am one
+obtains (see Se tion 5.1) an SK-se ure DiÆe-Hellman proto ol (with pfs) in the um. We omit a
+detailed des ription of the resultant proto ol and just point out that it is similar to proto ol sig-dh
+from Se tion 5.2 where the digital signatures are repla ed with the appli ation (by Pi and Pj ) of
+the MAC fun tion keyed under the shared key ij .
+
+
+                                                Proto ol rekey
+
+
+   Initial information: Ea h pair of players (Pi ; Pj ) share a se ret pseudorandom fun tion fij .
+   Proto ol rekey in the am:
+
+   Step 1:   The initiator, Pi , on input (Pi ; Pj ; s), hooses ri R f0; 1g2k and sends (Pi ; s; ri ) to Pj .
+   Step 2:   Upon re eipt of (Pi ; s; ri ), the responder Pj hooses rj R f0; 1g2k and sends (Pj ; s; rj ) to
+         Pi . Then, Pj outputs session key fij (ri ; rj )
+   Step 3:   Upon re eipt of (Pj ; s; rj ), player Pi outputs session key fij (ri ; rj ).
+
+   Proto ol rekey in the um:
+
+   Step 0:   Both players derive two keys from ij : 1 = fij (1) and 2 = fij (2).
+   Step 1:   The initiator, Pi , on input (Pi ; Pj ; s), hooses ri R f0; 1g2k and sends (Pi ; s; ri ) to Pj .
+   Step 2:  Upon re eipt of (Pi ; s; ri ), the responder Pj hooses rj R f0; 1g2k , omputes
+         tj = f1 (Pi ; ri ; s; rj ) and sends (Pj ; s; rj ; tj ) to Pi .
+   Step 3:  Upon re eipt of (Pj ; s; rj ; tj ), player Pi veri es the authenti ation tag tj and if su essful
+         it omputes ti = f1 (Pj ; rj ; s; ri ), sends (Pi ; s; ti ) to Pj , and outputs session key f2 (ri ; rj ).
+   Step 4:  Upon re eipt of (Pi ; s; ti ), player Pj veri es the authenti ation tag ti and if su essful it
+         outputs session key f2 (ri ; rj ).
+
+   Figure 7: Key-refresh proto ol based on a shared se ret. The proto ol in the um is the
+   result of applying the MAC-based authenti ator to the proto ol in the am
+
+
+    We pro eed to show yet another example of the appli ation of our modular methodology for
+designing and proving ke proto ols. In this ase we show a simple and eÆ ient proto ol to derive
+
+                                                         25
+a fresh session key between players Pi and Pj based on the ommon (\master") se ret key ij and
+without the use of DiÆe-Hellman (the proto ol does not provide pfs). In Figure 7 we present
+the proto ol in the am and the proto ol in the um where the latter is derived from the former by
+applying the above based MAC-based authenti ator to ea h of the proto ol's messages and joining
+(piggy-ba king) the ommon ows. We note that in this ase we use a pseudorandom family f
+rather than a mere MAC for the implementation of the authenti ator.
+    The SK-se urity (without pfs) of the am version of rekey follows dire tly from the properties
+of pseudorandom fun tions. The SK-se urity (without pfs) of the se ond proto ol in the um is
+the result of applying the MAC-based authenti ator to the rst proto ol. Note that we are using
+f2 with the fun tionality of a pseudorandom fun tion as in the am proto ol, and f1 with the
+fun tionality of a MAC for the implementation of the MAC-based authenti ator. As in the ase
+of proto ol sig-dh, also here we are re-using the strings ri and rj both for key derivation and as
+ hallenges for the authenti ator. We remark that the rekey proto ol in the um is similar to the
+AKEP2 proto ol from [7℄.
+    We end this se tion by remarking that another interesting use of our results is for analyz-
+ing the password-based ke proto ols from [27℄. It is shown there how to build a password-based
+authenti ator whi h is then used to authenti ate a DiÆe-Hellman ex hange.
+
+6        Appli ations to Se ure Channels
+
+It is ommon pra ti e to prote t end-to-end ommuni ations by letting the end parties ex hange
+a se ret session key and then use this key to authenti ate and en rypt the transmitted data under
+symmetri ryptographi fun tions. In order for a key-ex hange proto ol to be onsidered se ure it
+needs to guarantee that the above strategy for se uring data works orre tly, namely, that by using
+a shared key provided by the ke proto ol one a hieves sound authenti ation and se re y. As it is
+ ustomary, we will refer to a link between a pair of parties that a hieves these properties as a se ure
+ hannel. While se ure hannels may have di erent meanings in di erent ontexts, here we restri t
+our treatment to the above setting of se uring ommuni ations using symmetri ryptography with
+a key derived from a key-ex hange proto ol8 . We prove that an SK-se ure key-ex hange proto ol,
+appropriately ombined with se ure MAC and symmetri en ryption fun tions, suÆ es for realizing
+su h se ure hannels.
+
+6.1 A Template Proto ol: Network Channels
+We start by formalizing a \template proto ol" that aptures a generi session-oriented ke-based
+proto ol for se ure hannels between pairs of parties in a multi-party setting with parties P1 ; : : : ; Pn .
+This template proto ol, alled NetChan, simply aptures the me hanism by whi h two parties rst
+share a se ret key and then use this key for se uring information they ex hange. In the template
+proto ol this ex hange of information and the se urity fun tions applied to it are represented
+through abstra t `send' and `re eive' fun tions. Later we will see spe i implementations of this
+template proto ol where the generi `send' and `re eive' primitives are instantiated with a tual
+fun tions (e.g., for providing authenti ation and/or en ryption). We will also de ne what it means
+for su h an implementation to be \se ure".
+De nition of NetChan. A (session-based) network hannels proto ol, NetChan(; snd; r v), is
+de ned on the basis of a ke proto ol , and two generi fun tions snd and r v. (A more general
+    8
+        A somewhat di erent formalization of se ure hannels appears in [14℄ (see Appendix).
+
+
+                                                          26
+treatment an be obtained by onsidering these fun tions as intera tive proto ols but we leave this
+more general approa h beyond the s ope of the present paper.) Both snd and r v are probabilisti
+fun tions that take as arguments a session-key (we denote this key as a subs ript to the fun tion)
+and a message m. The fun tions may also depend on additional state information su h as a session-
+id and partner identi ers, a message identi er, et . The output of snd is a single value m0 , while
+the output of r v is a pair (v; ok) where ok is a bit and v an arbitrary value. (The bit ok will be
+used to return a veri ation value, e.g. the result of verifying an authenti ation tag.) On the basis
+of su h fun tions we de ne NetChan(; snd; r v) in Figure 8.
+
+
+                                       Proto ol NetChan    (; snd; r v)
+
+   NetChan (; snd; r v) is initialized with the same initialization fun tion I of the ke proto ol  . It an
+   then be invoked within a party Pi under the following a tivations:
+      1. establish-session(Pi; Pj ; s; role): this triggers a ke-session under  within Pi with partner Pj ,
+         session-id s and role 2 finitiator; responderg. If the ke-session ompletes Pi re ords in its lo al
+         output \established session s with Pj " and stores the generated session key.
+      2. expire-session(Pi ; Pj ; s): Pi marks session (Pi ; Pj ; s) (if it exists at Pi ) as expired and the
+         session key is erased. Pi re ords in its lo al output \session s with Pj is expired".
+      3. send(Pi ; Pj ; s; m): Pi he ks that session (Pi ; Pj ; s) has been ompleted and not expired, if so
+         it omputes m0 = snd (m), using the orresponding session key , sends (Pi ; s; m0 ) to Pj , and
+         re ords \sent message m to Pj within session s" in the lo al output.
+      4. On in oming message (Pj ; s; m0 ), Pi he ks that the session (Pi ; Pj ; s) has been ompleted and
+         not expired, if so it omputes (m; ok) = r v (m0 ) under the orresponding session key . If
+         ok = 1 then Pi re ords \re eived message m from Pj within session s." If ok = 0 then
+         no further a tion is taken.
+
+                            Figure 8: A generi network hannels proto ol
+
+
+    We emphasize that the above de nition of NetChan applies to either am or um adversarial
+models; indeed, the atta ker against NetChan is allowed to initiate and s hedule any of the proto ol
+a tivations and has all the apabilities of an atta ker in the orresponding model, in luding atta ks
+against the key-ex hange proto ol  (su h as party orruptions, session-state reveal, and session-
+key queries). Also for NetChan we keep our ke onvention that session identi ers are he ked for
+uniqueness. Note that NetChan has no lo al outputs labeled `se ret' (in parti ular, the session key
+is not part of the lo al output of NetChan as these keys are used internally and never passed to
+another proto ol). Thus, the external fun tionality of NetChan is as in a simple (session-based)
+message ex hange proto ol.
+
+6.2 Network Authenti ation
+On the basis of the above formalism, we treat the ase of network hannels that provide authenti-
+ ation of information over adversary- ontrolled hannels. Namely, we are interested in a NetChan
+proto ol that runs in the unauthenti ated-links model um and yet provides authenti ity of transmit-
+ted messages. This implementation of NetChan (whi h we all NetAut) will be aimed at apturing
+the pra ti e by whi h ommuni ating parties use a key-ex hange proto ol to establish a shared
+
+                                                      27
+session key, and use that key to authenti ate (via a message authenti ation fun tion, MAC) the
+information ex hanged during that session. Namely, if Pi and Pj share a mat hing session s and Pi
+wants to send a message m to Pj during that session then Pi transmits m together with MAC(m)
+where  is the orresponding session key.
+Proto ol NetAut . Let  be a ke proto ol and let f be a MAC fun tion. Proto ol NetAut(; f )
+is a network hannels proto ol NetChan(; snd; r v) as de ned in Figure 8, where fun tions snd and
+r v are de ned as:
+
+    On input m, snd(m) produ es output m0 = (m; f(m)).
+    On input m0, r v(m0) outputs (v; ok) as follows. If m0 is of the form (m; t) then ok = 1 if
+     and only if (i) m is di erent than all previously seen messages in the session, and (ii) (m; t)
+     passes the veri ation fun tion of f under key . If ok = 1 then set v = m, otherwise ok = 0
+     and v = null.
+Note that we require the re eiver of a message to he k for uniqueness of the in oming message. This
+ he k is needed to avoid \re-play" or dupli ation of delivered messages by an atta ker. Equivalently,
+one an think of m as the on atenation of the message with a unique per-message identi er whi h
+is omputed by the sender and he ked for uniqueness at the re eiver (e.g., based on a shared
+ ounter between the parties). For simpli ity and generality, in the above spe i ation of proto ol
+NetAut we abstra t out the spe i message di erentiation me hanism in use.
+    Our goal is to show that if the key-ex hange proto ol  is SK-se ure and the MAC fun tion f is
+se ure (against hosen-message atta ks) then the resultant network hannels proto ol NetAut(; f )
+provides authenti ated transmission of information. This requirement an be formulated under the
+property that \any message re orded by Pi as re eived from Pj has been ne essarily re orded as
+sent by Pj , ex ept if the pertinent session is exposed". We will a tually strengthen this requirement
+and ask that a network hannels proto ol provides authenti ation if it emulates (i.e. imitates) the
+transmission of messages in the ideally authenti ated-links model am. Formally, we do so using
+the notion of proto ol emulation and the formalization (see Se tions 2.3 and 3.4) of the message
+transmission proto ol (mt) in the am as done in [2℄. Re all that mt is a simple proto ol that spe i es
+the fun tionality of transmitting individual messages in the am. Here we extend the basi de nition
+of mt to a session-based message transmission proto ol alled smt. By proving that the network
+ hannels proto ol NetAut emulates smt in the um we get the assuran e that transmitting messages
+over unauthenti ated-links using NetAut is as se ure as transmitting them in the presen e of an
+atta ker that is not allowed to hange, dupli ate or inje t messages over the ommuni ation links.
+Proto ol smt. We extend proto ol mt from [2℄ to t our session-based setting in whi h trans-
+mitted messages are grouped into di erent sessions. We all the extended proto ol a session-based
+message transmission proto ol (smt), and de ne it in Figure 9. (Note the stru tural similarity be-
+tween smt and NetChan { the di eren es are that no a tual key-ex hange is run in smt, and the
+fun tions snd and r v are instantiated to simple \identity fun tions".)
+Se ure network authenti ation proto ols. Sin e proto ol smt represents a perfe tly authen-
+ti ated ex hange of messages, we use it as the spe i ation proto ol to de ne what is meant for an
+implementation of proto ol NetChan to be a se ure network authenti ation proto ol (for the de nition
+of the notion of \emulation" used in the following de nition see Se tion 3.4):
+
+De nition 11 Proto ol NetChan(; snd; r v) is alled a se ure network authenti ation proto ol if it
+emulates proto ol smt in the um.
+
+                                                 28
+                                               Proto ol smt
+
+
+   Proto ol smt an be invoked within a party Pi under the following a tivations:
+      1. establish-session(Pi; Pj ; s): in this ase Pi re ords in its lo al output \established session
+         s with Pj ".
+      2. expire-session(Pi ; Pj ; s): in this ase Pi re ords in its lo al output \session s with Pj is
+         expired".
+      3. send(Pi ; Pj ; s; m): in this ase Pi he ks that session (Pi ; Pj ; s) has been established and not
+         expired, if so it sends message m to Pj together with the session-id s (i.e., the values m and s
+         are sent over the ideally-authenti ated link between Pi and Pj ); Pi re ords in its lo al output
+         \sent message m to Pj within session s".
+      4. On in oming message (m; s) re eived over its link from Pj , Pi he ks that session (Pi ; Pj ; s) is
+         established and not expired, if so it re ords in the lo al output \re eived message m from
+         Pj within session s".
+
+   Figure 9: Proto ol smt in the am: The spe i ation proto ol for authenti ated session-
+   based message transmission.
+
+
+Theorem 12 If  is a SK-se ure key-ex hange proto ol in the um and f is a MAC fun tion
+se ure against hosen message atta ks, then proto ol NetAut(; f ) is a se ure network authenti ation
+proto ol.
+Proof: In order to show that NetAut(; f ) is a se ure network authenti ation proto ol we need to
+prove that NetAut(; f ) emulates smt in the um. Namely, given an atta ker U against NetAut(; f )
+in the um we need to build an am-atta ker, A, against smt that produ es a proto ol and adversary
+output that is indistinguishable from the output produ ed by the intera tion of U with NetAut(; f ).
+We de ne A to simulate U as follows. A builds a virtual \unauthenti ated" s enario in whi h it
+simulates U where to ea h party in smt orresponds a virtual party in the um world of NetAut(; f ).
+We denote by  the smt proto ol run in the am by A, and by 0 the simulated virtual proto ol
+NetAut(; f ) in the um. Also, we denote by P1 ; : : : ; Pn the parties running the smt-proto ol , and
+by P10 ; : : : ; Pn0 the orresponding virtual parties running 0 .
+    All the a tivations by U (su h as invoking ke-sessions, issuing \send" a tivations, orrupting
+parties and sessions, et .) are arried out in the virtual proto ol 0 through A. In parti ular, the
+a tion of virtual parties are arried out by A on their behalf; this in ludes the running of ke-session
+within 0 parties and the transmission of messages. The des ription of A is presented in Figure 10.
+The following fa ts about the behavior of A as de ned in Figure 10 are easy to inspe t.
+  1. A is a legal atta ker against smt in am (in parti ular, only previously re orded sent messages
+     are delivered, ex ept if the sender is orrupted or the session is exposed).
+  2. The a tions of U are perfe tly simulated by A (i.e., arried identi ally by A) against 0 .
+  3. All sent, established and expired events re orded in 0 are equally re orded in .
+  4. re eived events in  an di er from those in 0 only in the following ase (see Step 5 in
+     Figure 10): party Pi0 re orded \re eived message m from Pj0 within session s" in 0
+
+                                                     29
+                                               Adversary     A
+   A pro eeds as follows when intera ting with P1 :::Pn running smt in the am.
+      1. A initiates a opy of U , intera ting with parties P10 :::Pn0 running NetAut(; f ) in the um. In
+         parti ular, it evaluates the initialization fun tion I of NetAut(; f ) on random input and hands
+         U the publi output of I .
+      2. Whenever U a tivates Pi0 with an a tivation establish-session(Pi0; Pj0 ; s; role) or any a tivation
+         of Pi0 related to the run of a ke-session of proto ol  , A performs the resultant a tions within
+         Pi0 and hands out the resultant messages to U for delivery.
+      3. Whenever U issues Pi0 with one of the NetAut(; f ) a tivations send(Pi0 ; Pj0 ; s; m), expire-
+         session(Pi ; Pj ; s), or with in oming message (Pj ; s; m; t), A performs the resultant a tions
+                   0   0                                    0
+         of the players in 0 a ording to the NetAut(; f ) spe i ations. Every message generated by
+         the parties is transferred by A to U for delivery.
+      4. Whenever Pi0 re ords one of the events \established session s with Pj0 ", \session
+         s with Pj0 is expired", or \sent message m to Pj0 within session s", then in  at-
+         ta ker A issues to Pi the a tivation establish-session(Pi; Pj ; s), expire-session(Pi ; Pj ; s),
+         send(Pi ; Pj ; s; m), respe tively.
+
+      5. Whenever Pi0 re ords \re eived message m from Pj0 within session s", A does:
+           (a) If Pj re orded \sent message m to Pi within session s" then A a tivates Pi with
+               in oming message (m; s) from Pj .
+           (b) Else, if Pj is orrupted or session s within Pj is lo ally exposed, then A a tivates Pj with
+               send(Pj ; Pi ; s; m) (note that this sent event is not re orded at Pj by the onvention that
+               lo ally exposed sessions do not produ e output) and then a tivates Pi with in oming
+               message (m; s) from Pj .
+      6. Whenever U orrupts Pi0 , A hands U the internal data of the simulated Pi0 , and orrupts Pi
+         in the run of . Whenever U issues an exposure a tion against a session (Pi0 ; Pj0 ; s) within Pi0 ,
+         A hands U the orresponding information from the session within Pi0 and issues the exposure
+         against the session (Pi ; Pj ; s) within Pi in .
+      7. When U halts, A outputs whatever U outputs and halts.
+
+                         Figure 10: Emulation of smt: the am-adversary A.
+
+
+      but Pj0 did not re ord the orresponding sent event, and neither session s is exposed nor Pj0
+      is orrupted. We all this ase a forgery-event.
+     The above fa ts show that the simulation of U by A against the NetAut(; f ) proto ol is perfe t
+(i.e. identi al to a real run of U ) as long as a forgery-event as de ned above does not happen. (In
+the ase of a forgery-event the simulation of U by A fails sin e in 0 party Pi0 re ords the re eived
+message m while in  the orresponding party Pi will not re ord it.) In Lemma 13 below we show
+that this forgery-event happens with negligible probability (i.e., there is a negligible probability that
+in an unexposed session of 0 , a party Pi0 a epts a message from Pj0 that the latter did not send).
+Therefore, we have that the statisti al distan e between authsmt;A (k) and unauthNetAut(;f );U (k)
+is negligible. Consequently, NetAut(; f ) emulates smt in the um and thus it is a se ure network
+authenti ation proto ol.                                                                               2
+                                                      30
+Lemma 13 If  is a SK-se ure key-ex hange proto ol and f is a MAC fun tion se ure against
+ hosen message atta ks, then for any atta ker U running against NetAut the probability of a \forgery-
+event" (as de ned in the proof of Theorem 12) during an unexposed session is negligible.
+
+Proof: We prove the lemma by ontradi tion: if for a given atta ker U against NetAut(; f ),
+a forgery-event happens in an unexposed session with non-negligible probability then we build a
+forger for the MAC fun tion f that su eeds with non-negligible probability. For onvenien e, we
+denote the above assumed non-negligible probability of a forgery-event by " (more pre isely, this
+value is a fun tion of the se urity parameter).
+Building a forger F . The forger F has an ora le to f that uses an unknown random key; F an
+request from the ora le the value of f on any message under the ora les key and an also request
+the veri ation of pairs (m; t) in whi h ase the ora le veri es whether t is the orre t value of f (m)
+under the ora le's key (the latter are alled \veri ation queries"). The goal of F is to produ e a
+MAC forgery, i.e. the value of f on a message under the key of the ora le, without requesting the
+box to ompute this value. F starts by building a virtual NetAut world and a tivates U against
+it (similarly as A did in the proof of Theorem 12 but without any \smt parties"). In addition,
+F hooses a session at random (from all sessions ompleted during the run of the proto ol), say
+(Pi ; Pj ; s0 ). We will use the identi er s0 to refer to the hosen session or its mat hing session. In
+the ases where U delivers a message under the session-key of session s0 , F does not use the a tual
+session-key as ex hanged in the simulated proto ol but instead it requests the ora le to f to provide
+that value of f (i.e F is e e tively using the ora le key as the s0 session-key). Similarly, F uses
+the ora le to verify whether messages sent under session s0 possess the orre t value of f (this is
+needed in ases where U inje ts or hanges the authenti ation tags). If during simulation session
+s0 is exposed by U , then F aborts its omputation (i.e. it fails to forge). If at any point one of the
+partners to session s0 , say Pi , a epts a message as orre tly MACed while the other party did not
+re ord the orresponding sent event (in parti ular, F did not request the MAC of this message from
+its ora le) then F outputs the message and its MAC as sent to Pi as a forgery against the ora le
+to the MAC fun tion f . (Note that by the uniqueness property of sent and re eived messages in
+NetAut the message on whi h F outputs this forgery was never queried from the MAC ora le.)
+     Thus, if in the run of U by F a forgery-event happens under session s0 then F su eeds in
+produ ing a forgery against the MAC. We want to show that this happens with non-negligible
+probability.
+     Re all that we are assuming (by way of ontradi tion) that in a regular run by U a forgery-event
+happens with non-negligible probability ". Thus, if one hooses a session s0 at random, then in a
+run of U a forgery-event will happen in session s0 with non-negligible probability too (i.e., " divided
+by an upper bound on the number of sessions in the proto ol). However, the run of U by the forger
+F is not a regular run: the key used to MAC messages in session s0 is not the real session key
+ex hanged by the parties but an independent random value. Still we laim that if in a run of U we
+repla e the session-key in a randomly hosen session s0 with a random value then the probability
+of a forgery-event in that session does not hange signi antly, i.e., it remains non-negligible (and
+thus F has a non-negligible probability to break the se urity of the MAC fun tion f ).
+     In order to prove this laim we introdu e the following notation. If s is a session ompleted by
+some party under a run of U , then we denote by forgery(s) the event that a forgery-event happens
+during session s. We know, by assumption, that if s is hosen at random among all sessions under
+a regular run of U then the probability of event forgery(s) is non-negligible. We want to prove
+that this is the ase even when U is run by F . (In this ase, this probability, that we denote by
+P robF (forgery(s)), is taken over runs of U in whi h the real session-key for s is repla ed with a
+
+                                                  31
+random value.) The remainder of the proof is devoted to proving this laim.
+    The plan for this proof is as follows. Based on U , we build a ke-adversary Uke against the ke
+proto ol . Then we show that if in the modi ed run of U as produ ed by forger F the probability
+of a forgery-event hanges substantially (relative to its probability in a regular run of U ), then Uke
+breaks the SK-se urity of  (i.e., it an hoose a test-session in whi h to distinguish the real value
+of the session-key from a random independent value.)
+    Atta ker Uke runs  with n parties P1 ; : : : ; Pn by essentially simulating the a tions of U against
+a NetAut proto ol with proto ol  and MAC fun tion f . For this, Uke runs U against a virtual opy
+of NetAut(; f ), denoted 0 , with n players P10 ; : : : ; Pn0 . Ea h a tion de ided by U that on erns the
+ke proto ol part of 0 (su h as session establishment, party orruptions, session exposure, et .) is
+applied by Uke against the real run of  (i.e. against parties P1 ; : : : ; Pn ). Whenever U orders an
+a tion involving the omputation of a MAC value by party Pi0 using a ompleted and unexpired
+session-key (Pi0 ; Pj0 ; s), Uke he ks if it has already learned the value of that key (via a previous
+session exposure). If not, Uke issues a session-key query against (Pi ; Pj ; s). With the value of the
+learned session-key, Uke omputes the required value of f and hands it to U .
+    There is one ex eption, however, to the above behavior of Uke . Among the sessions ompleted
+in the run of , atta ker Uke hooses one at random as its test-session (e.g., Uke hooses at the
+beginning of its run a number j 2 f1; : : : ; `g where ` is an upper bound on the number of sessions
+ reated by U during its run, and then Uke hooses the j -th ompleted session as its test session).
+If U ends its run before the test-session is hosen, or if this session happens to be exposed at time
+of ompletion (i.e., either a partner to the session is orrupted before ompletion or U issued a
+session-state reveal against this session) then Uke stops its run without issuing a test-session query.
+Otherwise, on e the hosen test-session is ompleted, Uke issues a test-session query. We denote
+the test-session as s0 , and the response to the test query as v (as usual a bit b R freal; randomg
+is hosen and v is set to the real value of the session-key if b = real and to a random independent
+value otherwise9 .) Whenever U evaluates f involving the key of session s0 , Uke uses v as the
+value of the key for f . If at any point U produ es a forgery-event in session s0 (i.e. U is able to
+MAC under key v a message not MACed by Uke ) then Uke stops and outputs b0 = real. If at
+some point U stops its run, or if U orders the exposure of session s0 , then Uke stops and outputs
+b0 R freal; randomg.
+    Re all that we want to prove that P robF (forgery(s0 )) is non-negligible. This is equivalent to
+proving that the onditional probability
+                                     = P robUke (forgery(s0 ) : b = random)
+(now taken over the distribution of runs by Uke against proto ol ) is non-negligible. In order to
+show this we start by noting that the onditional probability
+                                       = P robUke (forgery(s0 ) : b = real)
+represents the probability that a forgery-event happens in a regular run of U (i.e. with all real
+session-keys used for MAC-ing information) in a randomly sele ted session s0 . As said earlier, this
+probability is "=` (the values " and ` are de ned above), and then non-negligible. We end the proof
+by proving that  (i.e. they di er by only a negligible amount) and thus is non-negligible.
+This proof is obtained via the analysis of the probability, denoted P rob(b0 = real), that Uke ends
+its run with output b0 = real (we onsider this probability only over runs in whi h Uke issues a
+  9
+      For larity, we denote bits by real and random rather than 0; 1.
+
+
+                                                        32
+test-session query). We have that P rob(b0 = real) equals
+P rob(b0 = real : forgery(s0 ))P rob(forgery(s0 ))+P rob(b0 = real : :forgery(s0 ))P rob(:forgery(s0 ))
+By the de nition of Uke , P rob(b0 = real : forgery(s0 )) is always 1 regardless of whether b is real
+or random. Similarly, P rob(b0 = real : :forgery(s0 )) is always 1/2 regardless of the value of b.
+    Now onsider the ase b = real; we have that
+              P rob(b0 = real : b = real) =
+              = 1  P rob(forgery(s0 ) : b = real) + 1=2  P rob(:forgery(s0 ) : b = real) =
+              = 1  + 1=2  (1      ) = 1=2 + =2:
+Similarly, for b = random we an obtain
+                           P rob(b0 = real : b = random) = 1=2 + =2:
+Sin e  is a SK-se ure ke proto ol we know that the di eren e between P rob(b0 = real : b = real)
+and P rob(b0 = real : b = random) is negligible, or otherwise Uke would break the se urity of .
+But then we have that  as we had to prove.                                                        2
+    Thus we have ompleted the proof of Theorem 12 showing that SK-se urity is a suÆ ient on-
+dition to guarantee the se ure omposition of key-ex hange proto ol with a network authenti ation
+appli ation. One important aspe t of the above proof is that it makes lear the need for allowing
+the atta ker against the key-ex hange proto ol (Uke in our ase) to keep running even after the
+value of the test-session is provided to him (see the remark after De nition 4); indeed, without that
+ apability the theorem is not true.
+
+6.3 Network En ryption
+In this se tion we treat the problem of se re y of ommuni ations, and introdu e a de nition of
+se re y in the ontext of general network hannels proto ols as de ned in Se tion 6.1. This notion of
+se re y is used in the next subse tion to formulate our de nition of se ure hannels and to analyze
+a spe i implementation of su h hannels using SK-se ure ke proto ols.
+Se ure network en ryption proto ols. We start by de ning what is meant for a network
+ hannels proto ol NetChan to be a \se ure network en ryption proto ol". We want to apture
+the se re y property that the atta ker does not learn information on messages that are ex hanged
+during unexposed sessions (see the \explanation" paragraph following the de nition). We follow
+the indistinguishability approa h used to de ne semanti se urity of en ryption (also used in our
+de nition of SK-se urity). For this we augment the apabilities of am and um atta kers that intera t
+with a network hannels proto ol to in lude the following a tion.
+
+     We let the atta ker A, running against NetChan, to hoose, at some arbitrary point
+     during the intera tion, a (single) test-session (Pi ; Pj ; s) among the sessions that are
+      ompleted, unexpired and unexposed at the time. Also, A gets to hoose a pair of
+     equal-length messages m0 ; m1 . Next, a bit b R f0; 1g is hosen (but not provided to A)
+     and Pi is a tivated with send(Pi ; Pj ; s; mb ). This a tivation follows the spe i ation of
+     a regular send-a tivation in the proto ol ex ept that when Pi re ords the sent event in
+     its lo al output it does not write down the value of mb . Later, if Pj is a tivated by A
+     under session s with some in oming message  and the output of r v () (where  is
+
+                                                  33
+     the session-key of the test session s) is the pair (mb ; ok = 1) then the re eive-a tivation
+     is re orded by the re ipient but the value mb is not written to the lo al output. The
+     atta ker A is allowed all the regular adversarial a tions ex ept that it is not permitted to
+     expose the test-session (Pi ; Pj ; s). (However, as in the ase of SK-se urity, the atta ker
+     is allowed to orrupt Pi as soon as the test-session expires, and to orrupt Pj as soon
+     as the mat hing session expires.) At the end of its run, A outputs a bit b0 (as its guess
+     for b).
+
+De nition 14 We say that a network hannels proto ol is a se ure network en ryption proto ol in
+the um if the probability of any um-atta ker A as des ribed above to guess orre tly b (i.e., to output
+b0 = b) is no more than 1/2 plus a negligible fra tion in the se urity parameter.
+Se urity of a network en ryption proto ol is de ned in the am in the same form provided the
+atta ker is a am-adversary with the above added apability.
+Explanation. We larify the rationale of the above de nition. In this de nition we want to
+ apture the se re y property of a network hannels proto ol, namely, the infeasibility of the atta ker
+to learn information on messages transmitted (usually in en rypted form) between the parties.
+However, note that in our formalism of network hannels the atta ker gets to learn the sent and
+re eived messages by wat hing the lo al output of the parties (re all that whatever is written on the
+lo al output be omes immediately available to A); moreover, the atta ker even gets to hoose the
+messages in sent-a tivations. So, how an we say that the atta ker does not learn the ex hanged
+messages? For this, we introdu e the test messages m0 and m1 that the atta ker gets to hoose but
+not to learn whi h one was sent. In parti ular, in order to hide this information from the atta ker
+we spe ify that the send and re eive a tivations orresponding to the test message do not re ord
+the value of the spe i sent or re eived message. Thus, for a proto ol to be se ure by our de nition
+it needs to make infeasible for the atta ker to guess orre tly (i.e., with non-negligible advantage)
+the sent test-message even though this atta ker has a ess to all other messages (in leartext form)
+that were sent and re eived during the proto ol.
+
+6.3.1 Dis ussion
+One importat aspe t of the above de nition is the way we spe ify the re eive-a tivations (at Pj )
+in whi h the test-message mb is not written to the lo al output. In order to highlight this issue
+let's onsider rst an alternative de nition of se urity of network en ryption proto ols. Namely,
+a de nition similar to the above de nition with the di eren e that the only re eive-a tivation in
+whi h mb is not written to the lo al output is an a tivation where the in oming message is identi al
+to the message, all it m , handed to A by Pi as the result of the test send-a tivation. In the sequel
+we refer to this variant of the de nition as the \stri t de nition" (of se ure network en ryption
+proto ols). The reason that we have not adopted this stri t de nition is that we onsider it over-
+restri tive: for example, this de nition all inse ure any network en ryption proto ol that spe i es
+that the message delivered to Pj is di erent from the exa t output produ ed by Pi . In parti ular, it
+would invalidate any proto ol that allows for some hanges to the transported messages to happen
+in transit, even though su h proto ols are ommon in pra ti e and se ure. For example, the AH
+proto ol from [31℄ allows some well de ned parts of the message header, su h as number of hops, to
+be hanged in-route by intermediate routers. Other proto ols allow for arbitrary or random padding
+of messages just to omply with some standard length boundary; a hange in-route of su h padding
+would not be he ked by the re eiver nor should su h hange impa t the se urity of the proto ol.
+
+                                                 34
+Thus, a better (and more realisti ) approa h is to permit su h possible (ino ous) hanges to the
+transported message, and only are about the orre tness of the value of the message a epted and
+re orded by the re eiver, namely, the output of the r v fun tion. This is why, under our de nition,
+we onsider any in oming message that \de odes" (under r v) to the test message mb as related to
+the test send-a tivation and then its de oded value is not dis losed to the atta ker.
+    One onsequen e of this de nitional de ision is that while De nition 14 does not expli itly
+mention the need to ensure the uniqueness of messages or the use of message identi ers, it a tually
+requires from a se ure network en ryption proto ol to be areful about the way it guarantees
+the uniqueness of transmitted messages. To illustrate this point onsider the following strategy
+for atta ker A. After a tivating Pi with the test send-a tivation with messages m0 and m1 , A
+a tivates Pi with another send-a tivation with m0 as the input message. Now, A delivers to Pj
+the message resultant from the later send-a tivation. If Pj does not write the de oded message
+to its lo al output then A learns that mb = m0 , if Pj does write the message then A learns that
+mb = m1 . Thus a se ure network en ryption proto ol must make this atta k impossible for A and,
+in parti ular, it must ensure the uniqueness of sent messages. This an be a hieved by the use of
+unique message identi ers that be ome part of the sent messages. We exemplify this me hanism
+in our realization of se ure hannels in Se tion 6.4.
+    Another remark on erning the \stri t de nition" dis ussed above is that it naturally orre-
+sponds to the way se urity of en ryption fun tions against hosen iphertext atta ks (CCA) is
+usually de ned. (That is, the de nition of CCA se urity allows an atta ker to query a de ryption
+ora le with any input iphertext ex ept for the one in whi h the atta ker is being tested.) While
+this orresponden e an be seen as an advantage of the \stri t de nition" it a tually points to an
+important issue here: CCA-se urity is not a ne essary notion when formalizing se urity of network
+ hannels. Indeed, the CCA formulation a tually arries the same drawba ks as dis ussed before
+for the stri t de nition. A further illustration of these issues an be found in the remark after the
+proof of Theorem 16.
+On the orre tness requirement. Noti e that De nition 14 does not make any \ orre tness"
+requirements from the en ryption proto ol. That is, it is not required that the re ipient will output
+the same message as re orded by the sender. While this is a natural requirement for a network en-
+ ryption proto ol (we want de rypted messages to orrespond to the plaintext originally en rypted)
+we omit it from our de nition sin e our use of network en ryption (for de ning and realizing se ure
+ hannels { see De nition 15) appears only in onjun tion with a network authenti ation proto ol,
+and the latter already guarantees this orre tness property. If one is interested in a stand-alone
+use of the notion of a network en ryption proto ol then adding this orre tness requirement to the
+above de nition is straightforward.
+
+6.4 Se ure Channels
+We are now ready to de ne what is meant by a \se ure hannels" proto ol.
+
+De nition 15 A network hannels proto ol in the um is alled a se ure network hannels proto ol
+if it is a se ure network en ryption proto ol and also a se ure network authenti ation proto ol.
+
+   We pro eed to show that the network hannels proto ol, denoted NetSe and de ned below,
+that applies en ryption to transmitted messages and applies a se ure MAC fun tion to the resultant
+ iphertext is a se ure hannels proto ol. In the des ription of this proto ol we assume expli it
+message identi ers that are part of the sent messages and make all these messages ne essarily
+
+                                                 35
+                                                                           ) where m is hosen by
+di erent. Spe i ally, the input to a send a tivation is a pair m = (m-id; m
+the atta ker at will but m-id is an identi er that is independent from the message ( an think of it
+as a message ounter) and is di erent from all message identi ers used in other send a tivations
+in the same session. In a tual implementations of the proto ol this unique m-id value needs to be
+ hosen by the sender and he ked for uniqueness at the re eiver; here we represent it as part of
+the input to the send a tivation in order to be onsistent with our general formalism of network
+ hannels from Figure 8 and to avoid the spe i ation of a parti ular message-id me hanism. This
+uniqueness of message identi ers is assumed only for un orrupted sessions.
+The se ure hannels proto ol NetSe . Let  be a ke proto ol, f a MAC fun tion, En
+a symmetri en ryption fun tion, and F a family of pseudorandom fun tions. We denote by
+NetSe (; f; En ; F ) the network hannels proto ol NetChan(; snd; r v), as de ned in Figure 8,
+that uses the snd and r v fun tions de ned as:
+     On input m = (m-id; m ), snd(m) produ es output m0 = (m-id; ; t) where         = En e (m  )
+      and t = fa (m-id; ). The keys e and a are omputed as F (0) and F (1), respe tively .  10
+
+
+
+     On input m0, r v(m0) outputs (m; ok) as follows. If m0 is of the form (m-id; ; t) then ok = 1
+      if and only if (i) m-id is di erent than all previously seen message identi ers in the session,
+      and (ii) (m-id; ; t) passes the veri ation fun tion of f under key a . If ok = 1 then set
+      m = En e1 ( ) and m = (m-id; m   ), otherwise ok = 0 and m = null. The keys e and a are
+      de ned as above.
+That is, fun tion snd applies an en ryption on the message and a MAC to the iphertext where these
+fun tions use \ omputationally independent" keys derived from the session  via a pseudorandom
+fun tion. The fun tion r v does the de ryption but only after verifying that the authenti ation of
+the iphertext is orre t.
+Note 1: We stress again our assumption that message identi ers are di erent for ea h sent message
+in a session (and he ked for uniqueness at the re ipient). In parti ular, this means that an
+implementation of the message id me hanism needs to make sure that the two parties of the
+session (while un orrupted) hoose di erent identi ers for ea h new message. This an a hieved,
+for example, if ea h party hooses the values m-id from disjoint sets (e.g., Pi sets the rst bit of its
+identi ers to 0 and Pj to 1). A tual proto ols an also spe ify the use of \dire tional" keys, i.e.,
+the keys used for the snd fun tion from Pi to Pj are di erent (and omputationally independent)
+from the keys used from Pj to Pi ; in this ase message identi ers need only be unique per dire tion.
+Clearly, these multiple keys an be derived from the session key  using a pseudorandom fun tion.
+Note 2: Message identi ers are not prote ted for se re y. Sin e they are hosen independently of the
+sent message this does not ompromise the se re y of the message. In parti ular, when analyzing
+the above proto ol as a network en ryption proto ol, we assume that the test messages m0 and m1
+from De nition 14 have the same message identi er so its exposure provides no information to the
+atta ker about whi h message mb was a tually sent.
+    In the following theorem we use the notion of a symmetri en ryption fun tion that is se ure
+against hosen-plaintext atta ks. For a formalization of this notion see [3℄ (see also the CPA game
+in Figure 11).
+   10
+      For simpli ity we assume the en ryption and authenti ation fun tions to use uniformly distributed keys of the
+same length; other ases an be handled via standard key derivation methods (e.g., trun ating the output of F ,
+iterating F to produ e longer outputs, et .).
+
+
+                                                        36
+Theorem 16 If  is a SK-se ure key-ex hange proto ol in um, f is a MAC fun tion se ure against
+ hosen-message atta ks, En a symmetri en ryption fun tion se ure against hosen-plaintext at-
+ta ks, and F a se ure family of pseudorandom fun tions, then NetSe (; f; En ; F ) is a se ure
+ hannels proto ol in the um.
+
+Proof: We an assume, for simpli ity, that keys e and a in NetSe (; f; En ; F ) are dire t
+outputs of proto ol  (and then indistinguishable from uniformly and independently hosen keys).
+A ounting for the fa t that we a tually derive them from a single session key  via a pseudorandom
+fun tion an be done using standard arguments.
+    The proof that NetSe (; f; En ; F ) is a se ure network authenti ation proto ol follows from
+Theorem 12 with one modi ation: here we are not applying the MAC fun tion dire tly to the
+plaintext but on the iphertext. Sin e by property of the en ryption fun tion we have that a
+ iphertext de rypts to a unique plaintext under key e then the authenti ation of the iphertext
+implies the authenti ation of the plaintext message. (Formally, one an onsider a modi ation of
+proto ol NetAut in Theorem 12 where the fun tion snd is de ned to rst en rypt the message and
+then authenti ate the iphertext under the MAC fun tion; the output of snd is the on atenation
+of the omputed iphertext and MAC tag. Similarly, r v rst he ks the MAC on the iphertext,
+and if su essful it de rypts the iphertext and outputs the plaintext message.)
+    The rest of the proof is devoted to proving that NetSe (; f; En ; F ) is a se ure network en-
+ ryption proto ol. The plan for the proof and many of the details are similar to the proof of the
+network authenti ation theorem (Theorem 12, and more spe i ally of Lemma 13). We thus sket h
+the most important aspe ts of the urrent proof but omit the details that are easy to omplete
+following the network authenti ation ase. Our goal here is to prove the theorem by way of ontra-
+di tion, namely, given an atta ker A that breaks the se urity of NetSe (; f; En ; F ) as a network
+en ryption proto ol then we an build an atta ker B that breaks the se urity of the symmetri
+en ryption fun tion En against hosen-plaintext atta ks.
+
+                              The CPA symmetri          en ryption game
+
+
+   The game is played by an atta ker B with a ess to an en ryption ora le E . On input m, the ora le
+   returns the en ryption of m under fun tion En using a se ret key  not provided to B . The game
+   pro eeds in phases:
+   Phase 1:  B queries E with any messages of its hoi e. At any point B may hoose to move to
+         phase 2.
+   Phase 2:   B hooses two equal-length messages m0 and m1 ; a bit b is hosen at random and the
+         value  = E (mb ) is returned to B . (The value of b is not provided to B .)
+   Phase 3:   Same as Phase 1.
+   Phase 4:B outputs a bit b0 .
+   And the winner is... B if and only if b = b .
+                                              0
+
+
+
+               Figure 11: CPA-se urity of the symmetri en ryption fun tion En
+
+
+   In order to apture the CPA-se urity of En (i.e., its se urity against hosen-plaintext atta ks)
+we onsider the game des ribed in Figure 11. By the assumption that En is semanti ally se ure
+
+                                                   37
+against hosen-plaintext atta ks we have that no polynomial-time atta ker B an win this game with
+non-negligible advantage (where \advantage" means the winning probability minus 1/2). However,
+we show next how to onstru t su h atta ker B given an atta ker A that breaks the se urity of
+NetSe (; f; En ; F ) as a network en ryption proto ol, i.e. an atta ker A that wins the test of
+De nition 14 against NetSe (; f; En ; F ) with non-negligible advantage. This proves that su h an
+atta ker A does not exist and then NetSe (; f; En ; F ) is a se ure network en ryption proto ol.
+(A pre ise quanti ed relation between the su ess probability of B and A an be easily derived
+from the proof arguments below.)
+Building B given A. Phase 1. B starts by building a virtual NetSe (; f; En ; F ) world (in luding
+the hoi e of initial information for the parties) and a tivates A against it. In addition, B hooses
+a session at random (from all sessions ompleted during the virtual run of NetSe (; f; En ; F ))
+under A, say (Pi ; Pj ; s0 ). We will use the identi er s0 to refer to the hosen session or its mat hing
+session. All a tions by A (a tivations or orruptions) that do not involve session s0 are arried by
+B using the spe i ation of NetSe (; f; En ; F ) and based on the full knowledge that B has of the
+information held by the parties in the proto ol. If at any point session s0 is exposed by A (this
+may happen as long as the session is unexpired at Pi or Pj ) then B outputs a random bit b0 and
+stops. When A a tivates the establishment of the ke session s0 between Pi and Pj , B a tivates
+Pi and Pj with the normal operations for session-key establishment as in proto ol . When A
+a tivates Pi or Pj with a send-a tivation under session s0 and input message m = (m-id; m            ), B
+                                                                                             0
+does not use the a tual key shared in session s0 to ompute the outgoing message m . Instead, B
+ omputes m0 = (m-id; ; t) where = E (m          ) (i.e., B uses the en ryption ora le for the en ryption
+of messages under session s0 ) and t = fa (m-id; ) where a is a key that B hooses independently
+and at random for use as the MAC key during session s0 .
+Re eive-a tivations under session s0 are handled by B (during Phase 1) as follows. Say Pj is
+a tivated with in oming message m0 = (m-id; ; t) under session s0 , then B he ks m-id for validity
+and if valid it uses its knowledge of a to verify the authenti ation tag t. If any of these veri ations
+fail then Pj sets ok = 0 and m = null. If the veri ation is su essful, in parti ular the triple
+(m-id; ; t) passes the veri ation of fa , then (ex ept for a negligible probability of forgery against
+the MAC) the pair (m-id; ) was in luded in the output of a previous send-a tivation under session
+s0 in whi h ase B already knows the plaintext en rypted under iphertext and an re ord the
+re eption of the message in Pj 's lo al input.
+If at any point A hooses a test session (a ording to De nition 14) di erent than s0 then B outputs
+a random bit b0 and stops. If s0 is hosen by A as the test session and messages m0 and m1 are
+provided by A then B moves to phase 2.
+Phase 2. Sin e we assume message-identi ers that are independent from the message then we have
+that the test messages m0 and m1 hosen by A have the same message identi er, whi h we denote
+by m-id . Namely, m0 = (m-id ; m    0 ) and m1 = (m-id ; m  1 ). Now, B uses the messages m
+                                                                                                0 and m1
+as its own test messages to ora le E in the CPA game. Let  be the value returned to B as the
+ora le response to this test. B then hands to A the triple (m-id ;  ; t ) where t = fa (m-id ;  ).
+As spe i ed in De nition 14, Pi does not re ord the a tual value of m          b (whi h B does not know
+anyway). Now, B moves to phase 3.
+Phase 3. The a tions of B in Phase 3 are similar to Phase 1 ex ept that now A may a tivate Pj
+with in oming message ontaining (m-id ;  ) for whi h B does not know its de ryption. In this
+ ase, B rst he ks the validity of the authenti ation tag in the in oming message. If it fails then no
+a tion is needed. If it is su essful then Pj re ords the re eption of the message in its lo al output
+but without spe ifying the de rypted message sin e this message is mb whi h, by spe i ation of
+
+
+                                                   38
+De nition 14, Pj does not write to its lo al output (thus, B does not need to know mb ).
+Phase 4. Whenever A stops its run with output b0 , B moves to phase 4 and stops with the same
+output b0 as A.
+Analysis of B. It is easy to verify that B as de ned above is a legal atta ker in the CPA game of
+Figure 11. We need to show that B has non-negligible advantage in winning that game. Proving
+this is similar to the analysis of the su ess probability of forger F in the proof of Lemma 13. First,
+we laim that the event in whi h the session s0 hosen at random by B is also the test session
+ hosen by A has non-negligible probability to o ur (simply be ause there are only polynomially
+many sessions). Se ond, we note that if s0 is hosen by A as the test session and B arries the
+a tions of A related to session s0 using the a tual session key ex hanged by Pi and Pj in that
+session then the advantage of B to guess b orre tly is the same as for A to guess orre tly (sin e
+in this ase the simulation of A by B is perfe t) and then non-negligible. So, the main argument is
+to show that repla ing the a tual session keys (for authenti ation and for en ryption) from session
+s0 with the random independent key a hosen by B for the MAC and the random independet
+key used by ora le E for its en ryptions does not signi antly hange the odds of A to win. This
+fa t follows from the SK-se urity of the ke proto ol  and its proof is similar to the proof of the
+analogous fa t in Lemma 13 (with B and A taking the roles of F and U , respe tively).
+                                                                                                    2
+On the (non) ne essity of CCA-se urity. The above Theorem shows that se urity against
+ hosen-plaintext atta ks (CPA) is all we need to require from the fun tion En in order to imple-
+ment se ure hannels. This is an important property sin e most symmetri en ryption fun tions
+and modes used in pra ti e are CPA-se ure but not se ure against hosen- iphertext atta ks (CCA).
+Also worth noting is that even the ombination of the MAC fun tion f on top of En does not ne es-
+sarily result in a CCA-se ure fun tion (namely, the fun tion snd de ned under NetSe (; f; En ; F )
+is not ne essarily CCA-se ure when onsidered as an en ryption fun tion with keys e and a ).
+To see this onsider a MAC fun tion with the property that ipping the least signi ant bit of an
+authenti ation tag does not hange the validity of the tag. In this ase the resultant omposed
+fun tion snd is not CCA-se ure while it suÆ es (by virtue of the above theorem) for implementing
+se ure hannels.
+This example also helps to emphasize the over-restri tive hara ter of the \stri t de nition" of a
+se ure network en ryption proto ol as dis ussed in Se tion 6.3.1. Indeed, it is easy to see that
+in order for proto ol NetSe to satisfy this stri t de nition one has to make sure that the snd
+fun tion in proto ol NetSe is CCA-se ure. In parti ular, the above example shows that the as-
+sumption that f is a se ure MAC fun tion is not enough to prove the network en ryption se urity
+of NetSe (; f; En ; F ) under the stri t de nition. Su h a de nition would require a stronger no-
+tion of a MAC where in addition to the regular unforgeability requirements one requires that the
+atta ker annot hange a given valid pair (m; t) (where m is a message and t a valid authenti ation
+                                             6 t0. When inspe ting the NetSe proto ol one an easily
+tag) into another valid pair (m; t0 ) with t =
+see that this extra requirement from the MAC fun tion is not a real se urity ne essity but just the
+arti ial result of the unne essarily restri tive nature of the stri t de nition.
+The order of en ryption and authenti ation. Re ent results in [33℄ show that if the en ryption
+fun tion is assumed to be se ure against hosen-plaintext atta ks (as in the above Theorem) then
+the ordering of rst applying the en ryption fun tion and then the authenti ation fun tion (as in
+NetSe (; f; En ; F )) is instrumental for guaranteeing se ure hannels. It is shown in [33℄ that other
+ ommon orderings of the fun tions (in whi h authenti ation is applied dire tly to the plaintext)
+ annot ensure se ure hannels even if the key-ex hange proto ol in use is (ideally) se ure.
+
+                                                 39
+Referen es
+
+  [1℄ D. Beaver, \Se ure Multi-party Proto ols and Zero-Knowledge Proof Systems Tolerating a
+      Faulty Minority", J. Cryptology (1991) 4: 75-122.
+  [2℄ M. Bellare, R. Canetti and H. Kraw zyk, \A modular approa h to the design and analysis
+      of authenti ation and key-ex hange proto ols", 30th STOC, 1998.
+  [3℄ M. Bellare, A. Desai, E. Jokipii, and P. Rogaway, \A on rete se urity treatment of sym-
+      metri en ryption: Analysis of the DES modes of operation", Pro eedings of the 38th Sym-
+      posium on Foundations of Computer S ien e, IEEE, 1997.
+
+  [4℄ M. Bellare, A. Desai, D. Point heval, and P. Rogaway, \Relations Among Notions of Se urity
+      for Publi -Key En ryption S hemes", Advan es in Cryptology - CRYPTO'98 Pro eedings,
+      Le ture Notes in Computer S ien e Vol. 1462, H. Kraw zyk, ed., Springer-Verlag, 1998, pp.
+      26{45.
+  [5℄ M. Bellare and C. Namprempre, \Authenti ated en ryption: Relations among notions and
+      analysis of the generi omposition paradigm", Advan es in Cryptology - ASIACRYPT'00
+      Pro eedings, Le ture Notes in Computer S ien e Vol. xxxx, T. Okamoto, ed., Springer-
+      Verlag, 2000.
+  [6℄ M. Bellare, E. Petrank, C. Ra ko and P. Rogaway, \Authenti ated key ex hange in the
+      publi key model," manus ript 1995{96.
+  [7℄ M. Bellare and P. Rogaway, \Entity authenti ation and key distribution", Advan es in
+      Cryptology, - CRYPTO'93, Le ture Notes in Computer S ien e Vol. 773, D. Stinson ed,
+      Springer-Verlag, 1994, pp. 232-249.
+  [8℄ M. Bellare and P. Rogaway, \Provably se ure session key distribution{ the three party ase,"
+      Annual Symposium on the Theory of Computing (STOC), 1995.
+
+  [9℄ R. Bird, I. Gopal, A. Herzberg, P. Janson, S. Kutten, R. Molva and M. Yung, \Systemati
+      design of two-party authenti ation proto ols," IEEE Journal on Sele ted Areas in Commu-
+      ni ations (spe ial issue on Se ure Communi ations), 11(5):679{693, June 1993. (Preliminary
+      version: Crypto'91.)
+ [10℄ S. Blake-Wilson, D. Johnson and A. Menezes, \Key ex hange proto ols and their se urity
+      analysis," Pro eedings of the sixth IMA International Conferen e on Cryptography and
+      Coding, 1997.
+
+ [11℄ S. Blake-Wilson and A. Menezes, \Entity authenti ation and key transport proto ols em-
+      ploying asymmetri te hniques", Se urity Proto ols Workshop, 1997.
+ [12℄ M. Burrows, M. Abadi and R. Needham, \A logi for authenti ation," DEC Systems Re-
+      sear h Center Te hni al Report 39, February 1990. Earlier versions in Pro eedings of the
+      Se ond Conferen e on Theoreti al Aspe ts of Reasoning about Knowledge, 1988, and Pro-
+       eedings of the Twelfth ACM Symposium on Operating Systems Prin iples, 1989.
+
+ [13℄ R. Canetti, \Se urity and Composition of Multiparty Cryptographi Proto ols", Journal of
+      Cryptology, Vol. 13, No. 1, 2000.
+
+
+                                              40
+[14℄ R. Canetti, \A uni ed framework for analyzing se urity of Proto ols", manus ript, 2000.
+     Available at http://eprint.ia r.org/2000/067.
+[15℄ R. Canetti, S. Halevi and A. Herzberg, \How to Maintain Authenti ated Communi ation",
+     Journal of Cryptology, Winter 2000. Preliminary version at 16th Symp. on Prin iples of
+     Distributed Computing (PODC), ACM, 1997, pp. 15-25.
+
+[16℄ R. Canetti and H. Kraw zyk, \Proving se ure omposition of key-ex hange proto ols with
+     any appli ation", in preparation.
+[17℄ R. Cramer and V. Shoup, \A pra ti al publi -key ryptosystem provably se ure against
+     adaptive hosen iphertext atta k", Advan es in Cryptology - CRYPTO'98 Pro eedings,
+     Le ture Notes in Computer S ien e Vol. 1462, H. Kraw zyk, ed., Springer-Verlag, 1998.
+[18℄ W. DiÆe and M. Hellman, \New dire tions in ryptography," IEEE Trans. Info. Theory
+     IT-22, November 1976, pp. 644{654.
+[19℄ W. DiÆe, P. van Oors hot and M. Wiener, \Authenti ation and authenti ated key ex-
+     hanges", Designs, Codes and Cryptography, 2, 1992, pp. 107{125.
+[20℄ D. Dolev, C. Dwork and M. Naor, Non-malleable ryptography, SICOMP, to appear. Pre-
+     liminary version in 23rd STOC, 1991.
+[21℄ O. Goldrei h, \Foundations of Cryptography (Fragments of a book)", Weizmann Inst. of
+     S ien e, 1995. (Available at http://philby.u sd.edu/ ryptolib.html)
+[22℄ O. Goldrei h, S. Goldwasser and S. Mi ali, \How to onstru t random fun tions," Journal
+     of the ACM, Vol. 33, No. 4, 210{217, (1986).
+
+[23℄ S. Goldwasser, and L. Levin, \Fair Computation of General Fun tions in Presen e of Im-
+     moral Majority", CRYPTO '90, LNCS 537, Springer-Verlag, 1990.
+[24℄ S. Goldwasser and S. Mi ali, Probabilisti en ryption, JCSS, Vol. 28, No 2, April 1984, pp.
+     270-299.
+[25℄ S. Goldwasser, S. Mi ali and C. Ra ko , \The Knowledge Complexity of Intera tive Proof
+     Systems", SIAM Journal on Comput., Vol. 18, No. 1, 1989, pp. 186-208.
+[26℄ C.G. Gunther, \An identity-based key-ex hange proto ol", Advan es in Cryptology - EU-
+     ROCRYPT'89, Le ture Notes in Computer S ien e Vol. 434, Springer-Verlag, 1990, pp.
+     29-37.
+[27℄ S. Halevi, and H. Kraw zyk, \Publi -Key Cryptography and Password Proto ols", ACM
+     Transa tions on Information and System Se urity, Vol. 2, No. 3, August 1999, pp. 230{268.
+
+[28℄ D. Harkins and D. Carrel, ed., \The Internet Key Ex hange (IKE)", RFC 2409, November
+     1998.
+[29℄ ISO/IEC IS 9798-3, \Entity authenti ation me hanisms | Part 3: Entity authenti ation
+     using asymmetri te hniques", 1993.
+[30℄ J. Katz and M. Yung, \Complete hara terization of se urity notions for probabilisti
+     private-key en ryption", Pro eedings of the 32nd Annual ACM Symposium on Theory of
+     Computing, 2000.
+
+                                             41
+[31℄ S. Kent and R. Atkinson, \Se urity Ar hite ture for the Internet Proto ol", Request for
+     Comments 2401, Nov. 1998.
+
+[32℄ H. Kraw zyk, \SKEME: A Versatile Se ure Key Ex hange Me hanism for Internet,", Pro-
+     eedings of the 1996 Internet So iety Symposium on Network and Distributed System Se-
+     urity, Feb. 1996, pp. 114-127.
+
+[33℄ H. Kraw zyk, \The order of en ryption and authenti ation for prote ting ommuni ations
+     (Or: how se ure is SSL?)", to appear Crypto 2001.
+[34℄ C. H. Lim and P.J. Lee, \A Key Re overy Atta k on Dis rete Log-based S hemes Using
+     a Prime Order Subgroup", Advan es in Cryptology { CRYPTO 97 Pro eedings, Le ture
+     Notes in Computer S ien e, Springer-Verlag Vol. 1294, B. Kaliski, ed, 1997, pp. 249{263.
+[35℄ P. Lin oln, J. Mit hell, M. Mit hell, A. S hedrov, \A Probabilisti Poly-time Framework for
+     Proto ol Analysis", 5th ACM Conf. on Computer and System Se urity, 1998.
+[36℄ S. Lu ks, \Open key ex hange: How to defeat di tionary atta ks without en rypting publi
+     keys," Pro eedings of the 1997 Se urity Proto ols Workshop, 1997.
+[37℄ A. Menezes, P. Van Oors hot and S. Vanstone, \Handbook of Applied Cryptography," CRC
+     Press, 1996.
+[38℄ S. Mi ali and P. Rogaway, \Se ure Computation", unpublished manus ript, 1992. Prelimi-
+     nary version in CRYPTO 91.
+[39℄ R. Needham and M. S hroeder, \Using en ryption for authenti ation in large networks of
+      omputers," Communi ations of the ACM, Vol. 21, No. 12, De ember 1978, pp. 993{999.
+[40℄ B. P tzmann, M. S hunter and M. Waidner, \Se ure Rea tive Systems", IBM Resear h
+     Report RZ 3206 (#93252), IBM Resear h, Zuri h, May 2000.
+[41℄ B. P tzmann and M. Waidner, \A General Framework for Formal Notions of `Se ure' Sys-
+     tem", Hildesheimer Informatik-Beri hte 11/94 Institut fr Informatik, Universitt Hildesheim,
+     April 1994.
+[42℄ B. P tzmann and M. Waidner, \A model for asyn hronous rea tive systems and its appli-
+      ation to se ure message transmission", IEEE Se urity and Priva y Symposium, May 2001.
+     Earlier version available in IBM Resear h Report RZ 3304 (#93350), IBM Resear h, Zuri h,
+     De ember 2000.
+[43℄ V. Shoup, \On Formal Models for Se ure Key Ex hange", Theory of Cryptography Library,
+     1999. Available at: http://philby.u sd.edu/ ryptolib/1999/99-12.html.
+[44℄ V. Shoup and A. Rubin. \Session key distribution using smart ards", Advan es in Cryp-
+     tology { EUROCRYPT 96 Pro eedings, Le ture Notes in Computer S ien e Vol. 1070,
+     Springer-Verlag, U. Maurer, ed, 1995.
+
+
+
+
+                                             42
+A     More on Related Work
+
+We provide some more details on several de nitional works on ke that are losely related to the
+present work.
+On the work of Bellare and Rogaway [7, 8℄. The rst omplexity-based formalization of se ure
+ke proto ols (i.e., the rst de nitions that take into onsideration the omputational limitations of
+an adversary and allow for an analysis that onsiders non-idealized ryptographi primitives) was
+presented by Bellare and Rogaway in [7, 8℄, in the ontext of shared long-term keys. These works
+postulate an adversary in harge of all ommuni ations, and expli itly model on urrent sessions
+by reating a model where the adversary is surrounded by \ora les" that represent sessions within
+parties. In su h a model, querying an ora le represents delivery of a message or the orruption
+of a session. Their method of de ning se urity is based on the method used for de ning semanti
+se urity of en ryption fun tions [24℄: the adversary should be unable to distinguish, with non-
+negligible probability, between the key of a hosen session and an independent random value. They
+prove the se urity of spe i authenti ation and key ex hange proto ols under these de nitions.
+Various works extend the [7, 8℄ framework to other settings and problems; for example, Shoup and
+Rubin to smart ard settings [44℄; Lu ks to onsider di tionary atta ks [36℄; Blake-Wilson, Johnson
+and Menezes [10, 11℄ for the publi key setting.
+    The original formalization of [7, 8℄ was later demonstrated to have a se urity aw, by Ra ko
+(personal ommuni ation, 1995). In an unpublished work, Bellare, Petrank, Ra ko and Rogaway
+[6℄ proposed a x for this aw. Our de nition of se urity (Se tion 4) follows essentially that xed
+version of the [7, 8℄ de nition, but ast in the proto ol and adversary framework used here. Next,
+we sket h the Ra ko atta k whi h is instru tive for pointing out to the subtleties involved in the
+formalization of se urity for key-ex hange proto ols.
+    In the de nitions of [7, 8℄, the adversary points to an unexposed session of its hoi e, and
+re eives a value kb , where k0 is the real session key of this session, k1 is an independently hosen
+random value, and b is a randomly hosen bit that is unknown to the adversary. The se urity
+requirement is that the adversary is unable to predi t b with non-negligible advantage over one
+half. The original version of these de nitions requires that the adversary outputs its guess for b
+immediately after it obtains the test value. Ra ko has noti ed that this requirement is not strong
+enough: Consider your favorite se ure key-ex hange proto ol . Now, add to the spe i ations of
+the proto ol the following instru tion for the party that ompletes rst the session establishment
+a ording to proto ol : if at any point this party re eives a message with the value MAC (0),
+where MAC is a se ure message authenti ation fun tion and  the established session-key, then
+the party publi izes (say via a further message in the proto ol) the value of . However, the
+proto ol never instru ts any party to arry out su h an instru tion. As a result the proto ol an be
+shown to pass the weakened de nition. On the other hand, it is lear that su h a proto ol annot
+be omposed se urely with an authenti ation appli ation that uses the session key for MAC-ing
+information (sin e su h an appli ation ould produ e the value MAC (0) that an be used to expose
+).
+    The x to the de nition, proposed by [6℄, is to let the adversary to ontinue intera ting with the
+proto ol even after the test value is re eived and before the guess is made. We stress that, although
+no atta ks against the xed de nition were known, up till now it was never demonstrated that
+this de nition (or any other) is \suÆ iently strong" for guaranteeing the se urity of the ommon
+appli ations that use key ex hange.
+On the work of Bellare, Canetti and Kraw zyk [2℄. A somewhat di erent approa h to
+
+                                                 43
+de ning se ure ke proto ols is taken in the work of Bellare, Canetti and Kraw zyk [2℄. First they
+spe ify an adversarial model ( alled the unauthenti ated-links model (um)) that represents the apa-
+bilities of the adversary in real-life networks. (As in [7, 8℄, this model also postulates independent
+sessions and adversarially ontrolled ommuni ation. However it is di erent in that it dire tly rep-
+resents a ommuni ation network and a ounts in a natural way to the fa t that other proto ols
+  an be running in the same system.) In this model they formalize the notion of authenti ators,
+i.e., \ ompilers" that transform proto ols that assume ideally-authenti ated ommuni ation into
+\equivalent" proto ols in the um. (Authenti ators are also formalized, in a di erent ontext, in
+[15℄.) In our work we borrow from [2℄ the above proto ol and adversarial models, and demonstrate
+the usefulness of the authenti ators notion for designing and analyzing proto ols.
+     In addition to the above basi models, [2℄ also treat the issue of se urity of ke proto ols.
+For this they formulate an \ideal ke pro ess" that is meant to apture the expe ted properties
+of a ke proto ol, and require that a se ure ke proto ol will \emulate" the ideal pro ess. Their
+notion of emulation is in uen ed by general de nitions of se urity of multi-party proto ols [23,
+38, 1, 13℄. They also onsider the use of ke for maintaining authenti ated ommuni ation. In
+parti ular, they laim that the standard method of ombining a ke proto ol with a shared-key
+message authenti ation ode (MACs) results in a se ure authenti ator. However, while the basi
+approa h of the [2℄ de nition of ke is intuitive and attra tive, their a tual de nition of se ure
+ke proto ols has several subtle short omings. One onsequen e is that, ontrary to their laims,
+their de nition of ke seems insuÆ ient to prove the se urity of the above-mentioned appli ation to
+  onstru ting authenti ators (via ke and MAC). Another onsequen e is that their de nition seems
+to be somewhat \over-restri tive", in the sense that it rules out ke proto ols that seem \intuitively
+se ure" and even provide se ure omposition with appli ations. In parti ular, Propositions 9 and
+10 from [2℄ are in orre t.
+On the work of Shoup [43℄. Shoup's de nitions are based on the simulatability approa h of
+[2℄ with some signi ant modi ations. Three levels of se urity are presented: Stati se urity (i.e.,
+se urity against adversaries that orrupt parties only at the onset of the omputation), adaptive
+se urity (where the adversary obtains only the long-term information of a newly orrupted party)
+and strongly adaptive se urity where the adversary obtains all the private information of orrupted
+parties. (Oddly, strongly adaptive se urity does not imply adaptive se urity.) In addition, two
+de nitions based on the indistinguishability approa h of Bellare and Rogaway [7℄ are presented.
+The rst is aimed at apturing se urity without perfe t forward se re y (PFS), and is shown
+to be equivalent to the stati variant of the simulation-based de nition. The se ond is aimed
+at apturing se urity with PFS, and is laimed to be equivalent to the adaptive variant of the
+simulation-based de nition. SuÆ ien y of the de nitions to onstru ting se ure- hannel proto ols
+is informally argued, but is not proved nor rigorously laimed.
+     While the rst variant of the indistinguishability-based de nition is roughly equivalent to the
+non-PFS variant presented here (modulo the general di eren es mentioned below), the se ond
+variant is stri tly weaker than our PFS formulation of SK-se urity. Spe i ally, the de nition in
+[43℄ a epts as se ure proto ols that do not erase sensitive ephemeral data (e.g. proto ol DHKE-1
+in [43℄), while the de nition here treats these proto ols as inse ure.
+     There are several other te hni al and methodologi al di eren es between the two works that we
+mention next. (a) A major methodologi al di eren e is our use of the authenti ated-links model
+and authenti ators as a simplifying analysis tool. While our formalization of se urity does not
+mandate the use of this methodology we arefully build our de nitions to a ommodate the use
+of this tool. (b) Shoup allows the adversary a more general atta k than session-key query, namely
+
+
+                                                 44
+an appli ation atta k that reveals an arbitrary fun tion of the key. Our modeling does not de ne
+this expli it atta k as it is subsumed by the session-key query apability and, in parti ular, sin e
+it is not ne essary for guaranteeing se ure hannels. ( ) Here we onsider an additional adversarial
+behavior that is not treated in [43℄. Spe i ally, we prote t against adversaries that obtain the
+internal state of orrupted sessions (even without fully orrupting the orresponding parties) by
+requiring that su h exposure will not ompromise other proto ol sessions run by the same parties.
+This prote tion is not guaranteed by some proto ols suggested in [43℄ (e.g., proto ol DHKE).
+(d) The treatment of the intera tion with the erti ate authority (CA) in the ase of publi -key
+based authenti ation. In [43℄ the intera tion with the CA is an integral part of every ke proto ol,
+whereas here this intera tion with the CA is treated as a separate proto ol. We make this hoi e
+for further modularity and ease of proof. Yet, as we already remarked in Se tion 2.2, the CA
+proto ol needs to be taken into onsideration with any full spe i ation and analysis of a tual ke
+proto ols. (e) The treatment of the session-id's. In [43℄ the session-id's are arti ially given to
+the parties by the model whi h results, in our view, in a more umbersome formalization of the
+se urity onditions. In ontrast, here we adopt a more natural approa h where the session-id's are
+generated by the alling proto ol and se urity is guaranteed only when these session-id's satisfy
+some minimal (and easy to implement) onditions. In parti ular, this formalism an be satis ed
+by letting the parties jointly generate the session-id (as is ommon in pra ti e).
+On the works of P tzmann, S hunter and Waidner [41, 40, 42℄ and Canetti [14℄. These
+works provide general frameworks for studying the se urity of ryptographi proto ols in several
+models of omputation, and prove some omposition theorems with respe t to proto ols that satisfy
+their respe tive de nitions of se urity. The proposed frameworks are natural andidates for de ning
+and studying se ure key-ex hange proto ols and their appli ation to providing se ure hannels. In
+parti ular, Canetti [14℄ de nes se ure key ex hange proto ols, as well as proto ols for providing
+\se ure sessions" within his framework, and uses his general omposition theorem in order to obtain
+similar results as the ones provided here (i.e., that the standard use of ke proto ols for se uring
+ ommuni ation sessions result in a good \se ure sessions" proto ol). The [14℄ de nition of se ure
+ke proto ols implies the de nition here. However, it is somewhat over-restri tive, as it implies the
+de nitions of both [2℄ and [43℄. (In parti ular, we do not know how to show that Proto ol en from
+Se tion 5.3 satis es this de nition.) In [16℄ we investigate a relaxed version of the [14℄ de nition
+of key ex hange, that is equivalent to the de nition here and at the same time enjoys the general
+ omposability properties provided by the [14℄ framework.
+
+
+
+
+                                                45
+

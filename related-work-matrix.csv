@@ -1,0 +1,10 @@
+source_id,研究层次,定位,攻击者及查询,公钥来源,泄漏口径,省略或改变的输入,保留性质,方法及关键前提,与HAKE重叠,不能直接覆盖的义务,结论
+H26,协议,§2.5–2.6及Fig.3与Thm.1–2,经典协议查询的QPT及声称的无界ROM分支,诚实setup且身份绑定,Corrupt及Session-State及Reveal受freshness限制,未提出本项目context投影,声称SK及PFS与hybrid及条件ITS,组件SK与KDF Thm.9组合,本项目唯一baseline,B1–B7衔接待核验,原文声明不等于本次独立证明
+C01,协议模型,§3.3与§4.1–4.2及Def.4,UM主动调度及单Test且Test后继续攻击,初始化长期凭据,目标及matching未暴露且可过期后腐化,无context省略,SK及模型内PFS,模拟及认证器组合,原模型语义来源,HAKE相反role及完成时点与Test文字有差异,模型来源不直接证明投影
+B23,协议与编译器,§2.4及Thm.2–4与Fig.8,AM到UM及单Test,长期公钥预先可得且临时诚实生成,目标不允许state reveal而非目标可以,§4.1仅合并报文和删除重复线上字段,SK正确性与密钥不可区分,CCA KEM加EUF-CMA MAC认证器及CPA临时KEM,HAKE KEM组件来源,无QKD及F与τ3且缺HAKE投影接口,可作为组件证明材料
+K25,KDF,Def.1–4及Fig.3与Table1及Thm.9和Lemma23,经典RO查询记录的KDF区分游戏,由source定义且SetKey可登记dishonest输入,α含公开context及source允许辅助信息,支持不同context但没有通用投影不变性,满足req的KDF伪随机性,独立source集合及source内相关与预测归约,HAKE实际所引框架2025版,B1秘密context及B2余项与B4索引映射,不能直接套用
+K26,KDF,2026修订版同名定义及§7.2与§8,NewKey及SetKey及KDF与Ro$-KDF加RO,source支持集与位置映射,α含c且context公开,ITS-KDF是独立构造而非删context,Thm.9的hybrid KDF及Thm.17另一构造,reqN和reqHybrid及查询数和源熵,复核新版是否消除衔接问题,B1与B2在新版仍存在且§8只给被动KE应用,不替换原HAKE构造
+D24,原语与符号协议分析,Def.4.1及Fig.5–6与Table2及Appendix C,HON或LEAK或MAL的PPT及另行符号模型,HON和LEAK诚实生成而MAL攻击者选择,HON仅解封结果而LEAK含sk及中间计算能力,MAL/HON/LEAK下不同binding而非统一删除定理,六类binding及具体AKE认证性质,计算游戏关系与Tamarin细粒度抽象,为pk_e及静态pk提供候选替代语言,逻辑身份与CK01时序及QKD故障未覆盖,不能从工具性质直接推出HAKE计算SK
+X24,具体hybrid KEM,Def.7及Thm.1–2与§6,经典ROM路径或量子安全PRF和KEM路径,challenge pk和ct诚实生成,C2PRI给予sk及原challenge,combiner不含PQ pk和ct但保留传统端相应值,IND-CCA,SDH加C2PRI或PQ KEM IND-CCA加PRF,字段省略思路已存在,C2PRI非K-PK且无AKE身份与QKD和PFS,非本项目充分创新
+S26,hybrid KEM及binding,Fig.7及Thm.14和Thm.16–22及附录,HON与LEAK与MAL分开且量子实例要求全套量子安全假设,IND-CCA诚实pk而binding按游戏,C2PRI给sk且binding泄漏另分,QSI只哈希两共享秘密及算法label,IND-CCA与分别证明的binding保持,Thm.14需一方CCA另一方C2PRI及skPRF和正确性,最接近仅秘密输入combiner,两KEM游戏不能替代HAKE状态化协议SK,必须披露binding存活的条件
+I11,规范草案,§5.3–5.6及§6.1–6.4与§8,经典与量子目标分开,框架KeyGen且独立密钥处理需另核查,强调LEAK并提醒应用检查MAL,CG和CK省略PQ pk和ct而UG和UK保留,IND-CCA及指定binding目标,基于引用论文的构造分析而非RFC保证,证明字段省略不是新主题,没有HAKE认证完成与QKD故障映射,固定draft-11不称最新版或RFC
