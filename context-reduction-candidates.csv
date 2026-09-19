@@ -1,0 +1,12 @@
+field,original_location,binding_layer,security_role,candidate_action,replacement_guarantee,missing_bridge,status
+"k*","c_KEM[8]；σ_KEM不变","L1/L2/L3","临时贡献与source/context对应","C1：仅第8项的candidate removal hypothesis；无实施","同侧σ保留可作元组重建依据；非KDF安全保证","C1-BG–FF；SP-01–05；B1秘密context及查询/确认映射","hypothesis"
+"pk_e","c_KEM[5]；KEM和τ1/τ3用途不变","L1/L2/L3","临时凭据及会话贡献绑定","C2：仅第5项的candidate removal hypothesis；无实施","适用K-PK与条件性AKE认证路径；C2PRI不跨pk","C2-BG–FF；SP-01–05；primitive到session及分支桥","hypothesis"
+"A","c_KEM[1]","L2/L3","发起身份与凭据/会话关联","C3：仅初步分析；未构造投影","setup及τ1条件性路径；另一context的A不是自动替代","PO-01；身份/角色/SID映射与分支证明","blocked"
+"A","c_QKD[1]","L2/L3","应用身份与QKD端点关联","C3：仅初步分析；未构造投影","理想配对节点与setup背景；非完整应用身份证明","PO-01/09；应用身份到节点/source/会话桥","blocked"
+"B","c_KEM[3]","L2/L3","响应身份与凭据/会话关联","C3：仅初步分析；未构造投影","setup及τ2条件性路径；另一context的B不是自动替代","PO-03；方向相关身份/角色/SID映射","blocked"
+"B","c_QKD[2]","L2/L3","应用响应身份与QKD端点关联","C3：仅初步分析；未构造投影","配对检索背景；非完整应用身份保证","PO-03/09；端点与预期B及会话桥","blocked"
+"pk_a","c_KEM[2]","L1/L2/L3","长期凭据与第二贡献及身份关联","C3：仅初步分析；未构造投影","候选K-PK与τ2路径的分别论证","PO-02；key到pk再到A/session；生成/泄漏及故障域","requires-proof"
+"pk_b","c_KEM[4]","L1/L2/L3","长期凭据与第一贡献及身份关联","C3：仅初步分析；未构造投影","候选K-PK与τ1路径的分别论证","PO-04；key到pk再到B/session；方向和泄漏域","requires-proof"
+"k1","c_KEM[6]；Alice k1 / Bob k1′","L1/L2/L3","认证贡献与秘密context关联","C3：仅初步分析；未构造投影","KEM/MAC原假设不是贡献agreement或key-commitment","PO-06；B1/B4/B7；贡献对应及秘密context模型","blocked"
+"k2","c_KEM[7]；Alice k2′ / Bob k2","L1/L2/L3","认证贡献及跨组件ID消息关联","C3：仅初步分析；未构造投影","KEM/MAC原假设；不自动跨不同key提供承诺","PO-07；B1/B3/B4/B7；贡献与QKD记录桥","blocked"
+"qkdKeyId","c_QKD[3]；接口及τ2/τ3不变","L2/L3","QKD检索同步及会话/source关联","C3：仅初步分析；未构造投影","一次性配对检索；ID唯一性非会话唯一性","PO-09；节点/会话/source索引；失效分支中的认证缺口","blocked"
