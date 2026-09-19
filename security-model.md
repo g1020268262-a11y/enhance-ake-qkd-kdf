@@ -1,66 +1,72 @@
-# M3：威胁模型、安全合同与准入规则
+# M3：安全模型来源与 closure 审查
 
-版本：2026-09-18。对象：原 HAKE Figure 3，**不含 reduced 变体**。输入是 M0/M1 和 [M2 核查](novelty-gap.md)；文献编号见 [来源清单](sources/README.md)。机器可读合同为 [security-contract.csv](security-contract.csv)，逐位置门槛为 [hybrid-branch-compatibility.csv](hybrid-branch-compatibility.csv)。
+版本：2026-09-19。对象：原 HAKE Figure 3，不含 reduced 变体。
 
-本文件已固定可由证据确定的能力、目标和边界；原文不唯一决定的完成/擦除/Test 语义保留为参数，不通过增加有利规则“完成证明”。因此 M3 分析交付完成，**与原论文完全一致的可执行安全模型尚不能冻结**。这不是需要用户替论文发明事实，而是需要后续证明接口澄清。
+**M3.2：OPEN ISSUE — WAITING FOR HUMAN REVIEW。** 已锁定来源与原文明示规则，但完整安全模型尚未冻结，不批准进入 M4。来源差异不是协议漏洞结论。
 
-## 1. 三层证据与模型版本
+## 1. 模型采用状态与来源
 
-- `H`：H26 §2.5、Fig.3、Def.7 和 Thm.1–2 的实际声明。
-- `R-CK`：H 引用的 CK01 全文及 B23；用来补充查询语义，但明确记录与 H 的差异。
-- `W`：本项目为以后形式化设计的事件记号/合同，不冒充原文规则，也未执行证明。
+研究目标仍是 HAKE context reduction 的 protocol-level proof bridge，不扩展为一般 Context Elision Framework。M2 已经用户审查通过 G1；这不代表任何字段删除结论。
 
-主目标仍是 H 所声称的 SK：匹配且未腐化的双方完成后 key 相同，以及 fresh 目标的 `k_h^2` 不可区分。分支差别写在合同里，不改变允许的第一轮转换：只删一个明确的 component-context 出现位置，其余消息、检查、接口、secret、label、L、输出拆分与方向不动。原文未给出的 pk/ct 校验不得自行加入。
+| 标识 | 锁定来源 | 地位 |
+|---|---|---|
+| H | [H26](2026-1231.pdf) §2.5 pp7–9、Fig.3 p13、§3.1 pp14–15 | HAKE 原规范；明示规则保留，缺失处不擅自补全 |
+| R-CK | [C01](sources/2001-040-ck01.pdf) §3.2–3.3、§4.1 | 独立 CK01 参考模型；下文使用印刷页，PDF 页码加 2 |
+| R-Boyd | [B23](sources/2023-167-boyd.pdf) §2.4 pp10–11、§4.1 pp21–22 | 独立 KEM-AKE 参考模型，不与 R-CK 合并 |
+| W | 本项目观察记号、候选解释及证明义务 | 非原文规则，未作安全证明 |
 
-## 2. Oracle 与可见输出
+H 和 B23 的上述印刷页与 PDF 页一致；版本与 SHA-256 见 [来源清单](sources/README.md)，来源文件未改动。
 
-下列参数使用统一记号 `π=(P,Q,s,role)`；这是名称归一化，不更改游戏。
+**最终采用状态：**本项目的规范目标固定为 H26 的 HAKE 模型；目前没有获批准、语义完整的可执行游戏。未选择 R-CK 替代 H，也未选择历史 Test 的补全方案。旧版将 CK01 与 Boyd 合称 R-CK 并直接补充规则的做法在此撤回。须待 OI-01–OI-06 人工裁决后，才能宣告完整模型冻结。
 
-| 操作 | 激活与返回 | 状态作用/限制 | 证据 |
-|---|---|---|---|
-| Setup | 诚实生成长期密钥并提供公共凭据 | 在攻击者交互前完成；不提供恶意注册 oracle | H p8；B23 p10 |
-| NewSession(P,Q,s,role) | 启动预期对端为 Q 的会话；可能返回首个网络消息 | UM 的 s 可尚未确定；图中随后由 ct1、ct2 构造 | B23 p10脚注2；H Fig.3 |
-| Send(P,Q,m) | 向 P 递交声称来自 Q 的 m；得到协议输出消息、拒绝/完成等可观察行为 | 可伪造、丢弃、延迟、转送及重排；不凭此读取秘密 | H p8；B23 p10 |
-| Corrupt(P) | 返回 P 当时完整内部状态，包括仍存长期/会话秘密 | B23 中诚实进程停止，攻击者可冒用该身份；H 只概述泄漏，引用细节采用 R-CK 并标记 | B23 p10；CK01 §3.2 |
-| Session-State(π) / RevealState | 返回尚未完成会话的本地内部状态，不是只返回 sk_e | H 禁止完成后查询；CK01 返回时擦除非输出状态，因此完成后为空。两者分别记录 | H p8；CK01 §3.3 p11 |
-| Reveal(π) / RevealKey | 返回完成会话的 session key，即 `k_h^2`，不是整个 F 输出 | R-CK 只允许未过期；不能合法泄漏目标或 matching 后仍称 fresh | H p8；CK01 §3.3 |
-| Expire(π) | 不返回秘密；删除该参与方保存的 session key，记录过期 | CK01 是每侧独立的本地事件；不自动让对侧同时过期 | CK01 §3.3；H 的复数措辞未给同步机制 |
-| Test(π) | 返回真实 `k_h^2` 或等长随机串；隐藏位 b 在游戏内固定 | B23 明确仅一次；R-CK 查询时 completed、unexpired、unexposed；后续仍须保持目标不暴露 | B23 p11；CK01 §4.1 pp13–15 |
+## 2. HAKE original semantics 与 reference model semantics
 
-本文件采用 `b=1` 表示真 key 的记号（B23）；CK01 原文用 `b=0` 表示真 key，交换命名无安全影响。H 的 advantage 为 `Pr[猜中]−1/2`；B23 与 KDF 的归一化不同，后续归约须显示换算，不直接复写常数。
+| 项目 | H：HAKE original semantics | R-CK：reference model semantics | R-Boyd：reference model semantics | 采用解释／状态 |
+|---|---|---|---|---|
+| Setup／网络 | p8：预先诚实生成长期密钥；攻击者控制启动和消息 | §3.2–3.3 pp9–10：攻击者调度；初始化认证分发公钥 | §2.4 p10：NewSession、Send、预先生成长期密钥 | 保留 H；不添加恶意注册 |
+| matching | Def.3 pp8–9：反向身份、同 SID、相反角色 | §3.3 p11：反向身份、同 SID，不要求相反角色 | §2.4 p10：反向身份、同 SID，无相反角色条件 | 保留 H 角色条件；三者不等同 |
+| SID 唯一性 | p8：由上层保证；Fig.3 为 ct1∥ct2 | p11：shell 禁止相同双方/SID 历史重用，不因 role 改变放行 | §4.1 p21：优化中双方间未完成会话 SID 唯一 | 原则保留，作用域未冻结：OI-05 |
+| Accept／Complete | p8：完成并计算 key；Fig.3 无正式 Accept/Return 点 | p11：子程序返回非空 key 为完成，空值为 abort | p10：有会话状态；Send 可 accept，但未定位 HAKE 事件 | 不合并派生、拆分、验证：OI-01 |
+| State reveal | p8：仅未完成会话，返回内部状态 | §3.2 p9：泄漏后该会话不再产生输出；§3.3 p11：返回后非输出状态已擦除 | p11：返回当前状态含临时秘密，条目未写同样完成限制或停止规则 | 保留 H 前置限制；查询后控制：OI-04 |
+| Corrupt | p8：返回当前全部内部状态 | p9：返回状态，诚实进程不再激活，由攻击者控制 | p10：同样明确不再激活 | 不把参考停止规则说成 H 明写：OI-04 |
+| Reveal key | p8：返回已完成会话 key | p11：不能查询已过期 key | p11：若有已接受 key 则返回 | H 的过期查询行为：OI-02/03 |
+| Erase | Expire 删除派生 key；Fig.3 没有临时状态擦除点 | p11：Return 擦除全部非输出局部状态；Expire 擦除输出 key | p10：完成且未过期会话保留 key，不能据此定位 HAKE 擦除点 | 不移植 Return 时间点：OI-06 |
+| Test eligibility | p8：completed 且 fresh；p9 文字允许先过期后腐化的会话仍可 Test | §4.1 p14：查询时 completed、unexpired、unexposed；之后仍不得暴露目标或匹配会话 | p11：仅一次；无此前目标 RevealKey/State 或任一方 Corrupt；列表未展开过期例外及完整后续限制 | 不把历史 Test 与 CK 路径等同：OI-02 |
+| Freshness | Def.4 p9：无 key/state reveal；若腐化须先过期；匹配会话同样满足 | pp11–14：目标或 matching 暴露均影响资格，含启动前腐化 | p11：Test 条目较简略，不从省略推导额外能力 | 保留 H 明示条件；完整拒绝规则：OI-02/03 |
+| Expire／Corrupt | pp8–9：在 respective parties 删除 key，先过期后腐化例外 | p11：本地已完成会话过期；p14脚注6：该侧过期即可腐化，不要求另一侧过期甚至完成 | p11：本地已完成会话 Expire；Test 的此前腐化禁令未展开例外 | CK 单侧语义已查明，但不自动移入 H：OI-03 |
+| 随机 Test 回答 | p8：等长均匀随机串 | p14：从协议 key 分布采样 | p11：从 keyspace 随机采样 | 保留 H；参考分布等价需另证 |
+| 攻击者 | p8：QPT，无 key-exchange oracle 的叠加访问 | 经典协议查询 | KEM-AKE 查询模型 | 保留 H 经典协议接口；哈希查询能力见 §6 |
 
-允许其他会话的合法 State/Reveal/Corrupt；不把全局禁止泄漏偷换成原模型。协议 oracle 输入/输出为经典字符串，QPT 仅说明攻击者计算能力。哈希是否允许量子叠加查询是单独维度，见 §6。
+H p9 的优势定义是 **有绝对值的** `|Pr[ExpKeyIND=1]−1/2|`；B23 p11 为 `2·|Pr[b′=b]−1/2|`。旧转述漏写绝对值，在本模型中更正，不据此制造新研究 gap。CK 用 b=0 表示真实 key，Boyd 用 b=1；隐藏位改名本身无影响，但不能掩盖时序或采样分布差异。
 
-## 3. Session、matching、freshness 与完成
+## 3. 冻结边界与人工审查
 
-### 3.1 身份和会话标识
+### 3.1 已解决的原文定位
 
-局部会话标识 `π=(P,Q,s,role)`；Figure 3 中 `s=ct1∥ct2`。H Def.3 的 matching 是 `(A,B,s,initiator)` 对 `(B,A,s,responder)`。CK01/B23 仅要求反向身份和同 s，不要求相反 role；本项目不删除 H 明写的 role 条件。`s` 的唯一性在 H 是上层假设；B23 优化要求双方间未完成会话不重用 s；CK01 shell 更强地禁止曾用会话标识。**不把其中某个唯一性实现偷偷加进 Figure 3**。实例的碰撞概率、去重和编码机制仍属待澄清。
+H matching 的相反角色条件已确定。CK01 的 Return/Expire 区分、单侧过期后腐化规则、State reveal 后停止输出也已查明；这些不是 H 的自动补充条款。PFS 不等于目标临时状态泄漏安全或 PCS；matching 正确性不保证双方一定完成、活性或双向显式确认。
 
-### 3.2 可复用的 R-CK freshness 精确规则
+以下 W 记号仅记录 Fig.3 的可见顺序，不是新增协议事件：
 
-令 `LocalExposed(π)` 表示发生过有效 State/Reveal，或在 π 本地 Expire 前其所属方被 Corrupt（包括启动前腐化）。`Exposed(π)` 是它本身或任一 matching 会话局部暴露。对预期 peer 的腐化也不能因 matching 会话尚不存在而豁免：只有该侧对应会话已本地过期，才可使用过期后腐化例外。R-CK 的 Test 在查询时要求：
+- Alice 的 `FDone_A`（完整 F 输出）在接收 τ3 之前；`Split_A`（拆分 k_h^1、k_h^2）画在接收 τ3 之后、验证之前；随后才是 `ConfirmVerify_A`（验证成功）。
+- Bob 在 τ2 验证、解封、QKD 查询成功后，依次 F 输出、拆分、`ConfirmSend_B`（生成并发送 τ3）。
+- 保留所有原中止分支；Fig.3 没有 Bob 接收 Alice 反向确认的事件。
 
-`Complete(π) ∧ ¬Expired(π) ∧ ¬Exposed(π)`，并且全游戏只选一个目标。
+不能仅凭 calculated session key 选定 FDone、Split 或成功验证作为 Complete；B23 的 Send 可 accept 也不能代替 HAKE 的程序点定位。
 
-Test 后仍不得暴露目标及 matching；可在某侧本地会话过期后腐化该侧，并继续运行攻击者。这就是本项目所引用的 CK01-PFS 路径。它**不要求先双方一起过期**，也不允许目标临时状态泄漏后仍挑战。
+### 3.2 OPEN ISSUE 清单
 
-B23 p11 的 Test 条目逐字禁止此前 Corrupt(A) 或 Corrupt(B)，没有在该条目展开 CK01 的过期例外。这里以 CK01 §4.1/脚注6 为 R-CK 的过期语义来源，不把 B23 的简略列表说成与它逐字相同；H-history 仍须独立处理。
+| ID | 未闭合语义 | 人工审查需要明确的规则；本轮均未选择 |
+|---|---|---|
+| OI-01 | Accept／Complete／Return | 分别定位 Alice、Bob 的完成、对外 key 输出和认证接受；解释 F、拆分、验证/发送的关系 |
+| OI-02 | Test freshness 与历史 key | 如何补全 H 的过期后 Test，或是否显式改用 CK 参考目标；明确历史 key 保存、Test 次数及前后暴露限制；后者改变采用范围，不能宣称等价 |
+| OI-03 | Expire 与 corrupt ordering | H 的调用对象、单侧/双侧操作、过期后 Reveal 行为；对端尚无 matching 会话时的腐化如何判断；不可擅加同步过期或腐化豁免 |
+| OI-04 | 泄漏后的控制行为 | H 是否继承 CK 的 State reveal 后会话停止输出及 Corrupt 后诚实进程停止；给出依据与影响 |
+| OI-05 | SID 唯一性域 | 上层唯一性覆盖哪些实例与历史、如何对应 ct1∥ct2；不自动加入 CK 历史去重或 Boyd 未完成去重 |
+| OI-06 | 临时状态擦除时间 | 每侧 Return/Expire 的保留状态；Alice 仍需 k_h^1 验 τ3，不能同时假定 FDone 即 Return 且所有非输出已擦除 |
 
-H p9 的非正式 freshness/PFS 文字还允许“已过期、后被腐化”的会话被 Test，而未解释已擦除 key 如何返回。可由 challenger 额外保存历史 key 形成另一个游戏，但 H 没有给出完整规则，且它不同于 R-CK 的 Test 前置条件。本项目不声称二者等价：`TestTiming=R-CK` 是参考合同，`TestTiming=H-history` 是未冻结参数。证明若选择前者，只能称 CK01 参考语义下保持，不能宣称已覆盖 H 的全部字面可挑战集合。
+逐项登记见 [model-assumption-table.csv](model-assumption-table.csv)。这些问题是规范差异或信息不足，不是攻击结论。任何补全均是 requires validation，尚未成为本项目采用假设。
 
-### 3.3 事件与接受不能混为一谈
-
-为避免把“派生”自动升级为“认证接受”，定义 W 观察事件：
-
-- `Derive_A`：Alice 按 Fig.3 本地算出 F 输出；此时尚未成功验证 τ3。
-- `Derive_B`：Bob 验证 τ2、解封、QKD 查询非 ⊥ 后算出 F 输出。
-- `ConfirmSend_B`：Bob 用 `k_h^1` 生成并发送 τ3。
-- `ConfirmVerify_A`：Alice 成功验证 τ3；失败时仍走原 fail 分支。
-
-论文级 `Complete` 究竟对应 Alice 的 `Derive_A` 还是 `ConfirmVerify_A`，原文“calculated session key”与图的后续处理之间没有唯一的正式解释。不能把二者合并以减少攻击者能力。若未来用 `Accept_A=ConfirmVerify_A`、`Accept_B=ConfirmSend_B`，这是显式标明的 W 细化，须另证与 H 游戏的关系；Bob 没有收到 Alice 的反向确认事件。
-
-CK01 约定返回时擦除全部非输出会话状态；它解释抽象 PFS，不证明 HAKE 实现何时擦除 `sk_e,k1,k2,k*,k_qkd,k_h^1`。尤其 Alice Derive 后还需 k_h^1 验 τ3，故不能同时假设“Derive 即返回且所有非输出都已擦除”。这项冲突记为 B5，未被 M3 消除。
+审查者须记录批准规则、依据、偏离 H 的范围及对 freshness/状态可见性的影响，再重新判断是否冻结。不能只批准“统一按 CK01”而忽略 H 的明示差异。本轮停止语义选择；§4–8 保留既有合同背景，不开展新字段职责或删除分析。
 
 ## 4. Setup 与 QKD 边界
 
@@ -103,19 +109,19 @@ KDF 游戏的四个查询是：NewKey(i,j) 登记一次 honest 元组并返回 �
 
 攻击者合同维度为 `(计算能力, 协议查询接口, 哈希查询接口, 查询预算)`。H 的 QPT 不获协议叠加访问；K25/K26 的所引证明使用经典 RO 查询记录。量子 RO 的扩展未核验。QT 必须保留理想哈希限制，且 B2 表明 qRO/猜测项不能在无界声称中丢弃。现阶段**不认证 QT 的纯 2·Pr[QKDfail] 界，也不以较窄的查询受限结论冒充它**。
 
-## 7. Binding 假设与较窄合同 C-BIND
+## 7. Binding 候选假设与未启用合同 C-BIND
 
 D24 Def.4.1/Fig.5–6：`X-BIND-P-Q` 禁止两次非 ⊥ 结果在 P 上相等而 Q 上不同。`HON` 使用诚实密钥与解封 oracle；`LEAK` 还给出诚实 sk，攻击者可检查中间值；`MAL` 允许选择密钥材料并比较 Encaps/Decaps 的不同组合。原文 Def.4.1 针对 PPT，应用到 QPT 须有相应实例结论。MAL 不是 HAKE 主模型自动具有的注册能力。
 
 例如 K–PK 是相同共享 key 对不同 pk 的碰撞限制；K–CT 是对不同 ct 的限制。C2PRI 则在固定诚实 `(pk,sk)` 和诚实 `(k,ct)` challenge 后（sk 也已给出）限制另一个解封到 k 的 ct。它不蕴含跨 pk 身份绑定，不能与 K–PK/K–CT 互换。HON 也不能在有合法 sk 泄漏的归约中替 LEAK。对接收的 pk_e 是否可视为诚实，依赖 τ1 认证及分支，不由 Bob 正常执行 KeyGen 一句话保证。
 
-建立独立的待证合同 `C-BIND(D,X,P,Q)`：
+仅登记 candidate hypothesis / proof obligation：待证合同 `C-BIND(D,X,P,Q)`，尚无安全结论：
 
 - D 为一个明确位置投影；保持主机、QKD 和原消息边界。
 - 限定为具备指定 `X-BIND-P-Q` 性质的 KEM 实例，并注明 QPT/PPT 与 hash 假设。
-- 仅覆盖 BG、KO 和 QS；QS 虽允许 secrecy 失效，仍要求该 binding 存活，且其余 source/协议义务必须另证。
+- 拟议目标范围仅为 BG、KO 和 QS，尚未证明覆盖；QS 虽允许 secrecy 失效，仍要求该 binding 存活，且其余 source/协议义务必须另证。
 - 不覆盖 QB、QT，不声称完整原 hybrid 保持；新增假设同时限制**实例、攻击者及允许的故障集合**。
-- binding 是候选必要前提而非已证充分条件；必须另补 credential/identity、角色、完成时间和非循环的协议归约。
+- binding 是待验证的候选假设，必要性和充分性均未证明；必须另补 credential/identity、角色、完成时间和非循环的协议归约。
 
 此合同已经登记，以防后续无意收窄主张；本阶段没有任何字段被判为“仅附加 binding 条件下兼容”，因为连该条件的充分性也尚未证明。
 
@@ -125,4 +131,4 @@ D24 Def.4.1/Fig.5–6：`X-BIND-P-Q` 禁止两次非 ⊥ 结果在 P 上相等�
 
 逐字段门槛必须引用具体合同 cell。只有所有原承诺 cell 都覆盖、且 B1–B7 已闭合或有明确不影响证明的理由，才可写“全部原分支兼容”。只有附加假设的充分性已经得到论证才可写“仅附加 binding 条件下兼容”。“候选依据在某分支失效”不等于“删字段一定不安全”，因此目前均判**证据不足**，不是“不兼容”或“已有反例”。
 
-M3 尚未冻结的精确接口：Complete/Return 事件；每侧的擦除状态；H-history Test 的保存/查询语义；SID 唯一性在 Figure 3 上的落实；KDF source 与 α 的合法映射；RO 查询能力。它们已变成可定位的证明义务，不通过假定这些问题已解决来批准 M4 正面删减。
+M3.2 以 §3 和假设表为准：OI-01–OI-06 均为 OPEN ISSUE，等待人工审查，本轮不进入 M4。未来 M4 首先做职责映射，不以已经证明可删为入场条件。B1–B7 中 source/KDF/RO 等证明义务继续保留，本轮不解决；假设登记不是证明完成。

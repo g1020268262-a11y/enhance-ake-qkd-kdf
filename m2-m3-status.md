@@ -1,5 +1,19 @@
 # M2–M3 任务卡与交付状态
 
+## 2026-09-19：M3.2 closure 更新（优先于下方历史记录）
+
+M2 已经用户审查通过 G1；HAKE 特定 protocol-level proof bridge 目标保持不变。本轮仅审查模型来源和安全语义，不进入字段职责或删除分析。
+
+新增 [16 项假设表](model-assumption-table.csv) 和 [M3 conclusion / Completion Report](m3-conclusion.md)。H26、CK01、Boyd 分开记录，撤回旧版合称 R-CK 的规则补全。合同和四候选表均明确为证明义务或待验证假设。
+
+**M3.2 = OPEN ISSUE / WAITING FOR HUMAN REVIEW**：OI-01–OI-06 等待人工裁决；来源锁定不等于完整游戏冻结。M3.2 保持未勾选，不进入 M4；旧版模型描述以新 [security-model.md](security-model.md) 为准。
+
+本轮视觉复核包括 HAKE pp8–9/Fig.3、CK01 印刷 pp9/11/14、Boyd p11。阅读渲染保留在 `tmp/pdfs/m3-closure/`；未执行历史清理请求，未删除正式证据。没有修改协议或 M2 核心结论，没有攻击搜索、Tamarin、theorem 或 commit/push。
+
+本轮文档验证通过：16×5 假设表、33×11 合同、4×17 候选表、引用与标签、10 个来源哈希、9 个 BibTeX 条目、本地链接及路线图边界；`git diff --check` 无内容格式错误。这不是协议安全性验证。
+
+## 2026-09-18 历史交付记录
+
 日期：2026-09-18。用户范围：完成路线图 M2–M3；不扩展到 M4 选定变体、删字段、攻击复现、形式验证或 benchmark。
 
 ## M2
