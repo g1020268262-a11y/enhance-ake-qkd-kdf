@@ -1,5 +1,7 @@
 # Model Freeze Review: baseline security interpretation proposal
 
+> 2026-09-19 阶段更新：用户依据 AKE+QKD 最新审查授权进入 **M4 仅字段职责／证明义务映射**。M3.2 baseline interpretation 审查通过，不等于完整安全游戏冻结；OI-01–OI-06 和 B1–B7 仍开放。下文原阶段“不得进入 M4／等待审查”的停止记录仅保留为历史，不再阻止描述性映射；不授权变体或安全保持证明。当前映射交付及 G3-M4 待审状态见 [m4-proof-obligation.md](m4-proof-obligation.md)。
+
 日期：2026-09-19。状态：PROPOSAL / NOT FROZEN。本文件只回答未来 HAKE 安全分析应采用哪些最低限度的语义，不构造安全游戏或协议变体。M3.2 documentation 已完成，security model 尚未冻结；本轮不进入 M4。
 
 “最低限度”指覆盖 HAKE 原声明所必需的语义接口，不指选择最弱攻击者、最强模型，或删去难以证明的原目标。建议采用的内容不等于已经批准，更不等于安全证明。现有 [security-model.md](security-model.md) 的开放状态保持不变。

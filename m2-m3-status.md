@@ -1,5 +1,7 @@
 # M2–M3 任务卡与交付状态
 
+> 2026-09-19 阶段更新：用户依据 AKE+QKD 最新审查授权进入 **M4 仅字段职责／证明义务映射**。M3.2 baseline interpretation 审查通过，不等于完整安全游戏冻结；OI-01–OI-06 和 B1–B7 仍开放。下文原阶段“不得进入 M4／等待审查”的停止记录仅保留为历史，不再阻止描述性映射；不授权变体或安全保持证明。当前映射交付及 G3-M4 待审状态见 [m4-proof-obligation.md](m4-proof-obligation.md)。
+
 ## 2026-09-19：M3.2 closure 更新（优先于下方历史记录）
 
 M2 已经用户审查通过 G1；HAKE 特定 protocol-level proof bridge 目标保持不变。本轮仅审查模型来源和安全语义，不进入字段职责或删除分析。

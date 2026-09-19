@@ -1,5 +1,7 @@
 # M3：安全模型来源与 closure 审查
 
+> 2026-09-19 阶段更新：用户依据 AKE+QKD 最新审查授权进入 **M4 仅字段职责／证明义务映射**。M3.2 baseline interpretation 审查通过，不等于完整安全游戏冻结；OI-01–OI-06 和 B1–B7 仍开放。下文原阶段“不得进入 M4／等待审查”的停止记录仅保留为历史，不再阻止描述性映射；不授权变体或安全保持证明。当前映射交付及 G3-M4 待审状态见 [m4-proof-obligation.md](m4-proof-obligation.md)。
+
 版本：2026-09-19。对象：原 HAKE Figure 3，不含 reduced 变体。
 
 **M3.2：OPEN ISSUE — WAITING FOR HUMAN REVIEW。** 已锁定来源与原文明示规则，但完整安全模型尚未冻结，不批准进入 M4。来源差异不是协议漏洞结论。

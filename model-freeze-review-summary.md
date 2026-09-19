@@ -1,5 +1,7 @@
 # Confirmed
 
+> 2026-09-19 阶段更新：用户依据 AKE+QKD 最新审查授权进入 **M4 仅字段职责／证明义务映射**。M3.2 baseline interpretation 审查通过，不等于完整安全游戏冻结；OI-01–OI-06 和 B1–B7 仍开放。下文原阶段“不得进入 M4／等待审查”的停止记录仅保留为历史，不再阻止描述性映射；不授权变体或安全保持证明。当前映射交付及 G3-M4 待审状态见 [m4-proof-obligation.md](m4-proof-obligation.md)。
+
 Model Freeze Review，2026-09-19。此处 Confirmed 仅表示有原文依据，不表示模型已冻结或安全已证明。
 
 - H26 §2.5、Def.3–6 明示会话、带相反角色条件的 matching、Key-IND、matching 完成双方 key 一致性和 PFS 目标。
